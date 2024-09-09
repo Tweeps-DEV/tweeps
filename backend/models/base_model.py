@@ -20,7 +20,8 @@ class BaseModel:
 
     id: Mapped[str] = mapped_column(String(60),
                                     primary_key=True,
-                                    nullable=False)
+                                    nullable=False,
+                                    unique=True)
     created_at: Mapped[datetime] = mapped_column(DateTime,
                                                  default=datetime.utcnow,
                                                  nullable=False)
