@@ -17,11 +17,13 @@ class Base(DeclarativeBase):
 
 class BaseModel:
     """Defines all common attributes/methods for other classes"""
+    __abstract__ = True
 
     id: Mapped[str] = mapped_column(String(60),
                                     primary_key=True,
                                     nullable=False,
-                                    unique=True)
+                                    unique=True
+                                    default=lambda: str(uuid.uuid4())
     created_at: Mapped[datetime] = mapped_column(DateTime,
                                                  default=datetime.utcnow,
                                                  nullable=False)
@@ -38,11 +40,6 @@ class BaseModel:
                 if key == 'created_at' or key == 'updated_at':
                     value = datetime.fromisoformat(value)
                 setattr(self, key, value)
-        else:
-            self.id = str(uuid.uuid4())
-            self.created_at = datetime.utcnow()
-            self.updated_at = datetime.utcnow()
-            # storage.new(self)
 
     def __str__(self):
         """Overwrites __str__ to print
