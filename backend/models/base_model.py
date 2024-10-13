@@ -15,7 +15,7 @@ class Base(DeclarativeBase):
     pass
 
 
-class BaseModel:
+class BaseModel(Base):
     """Defines all common attributes/methods for other classes"""
     __abstract__ = True
 
