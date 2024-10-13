@@ -15,21 +15,19 @@ class Base(DeclarativeBase):
     pass
 
 
-class BaseModel(Base):
+class BaseModel:
     """Defines all common attributes/methods for other classes"""
-    __abstract__ = True
+
     id: Mapped[str] = mapped_column(String(60),
                                     primary_key=True,
                                     nullable=False,
-                                    default=lambda: str(uuid.uuid4()))
+                                    unique=True)
     created_at: Mapped[datetime] = mapped_column(DateTime,
                                                  default=datetime.utcnow,
-                                                 nullable=False
-                                                 default=lambda: datetime.utcnow())
+                                                 nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime,
                                                  default=datetime.utcnow,
-                                                 nullable=False
-                                                 default=lambda: datetime.utcnow())
+                                                 nullable=False)
 
     def __init__(self, *args, **kwargs):
         """Loads an object from kwargs if not empty"""
