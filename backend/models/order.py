@@ -1,29 +1,40 @@
 #!usr/bin/env python3
 """Defines an Order model"""
-from .base_model import Base, BaseModel
-from .menu_item import MenuItem
-from .user import User
-from sqlalchemy import Float, ForeignKey, relationship, String, Table
-from sqlalchemy.orm import Mapped, mapped_column
-from typing import List, Optional
+from app import db
+from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
 
+class Order(db.Model):
+    """
+    Represents an order in the system.
 
-order_items = Table(
-    'order_items',
-    Base.metadata,
-    Column('order_id', ForeignKey('orders.id'), primary_key=True),
-    Column('menu_item_id', ForeignKey('menu_items.id'), primary_key=True),
-    Column('quantity', Integer)
-)
+    This class defines the structure of Order objects and their relationship to Users.
 
+    Attributes:
+        id (UUID): The unique identifier for the order, stored as a UUID.
+        user_id (UUID): The UUID of the user who placed the order.
+        date (datetime): The date and time when the order was placed.
+        total (float): The total amount of the order.
+        status (str): The current status of the order.
+        user (relationship): Relationship to the user who placed the order.
 
-class Order(BaseModel):
-    """An Order made by a client"""
+    """
+
     __tablename__ = "orders"
 
-    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
-    total_price: Mapped[float] = mapped_column(Float, nullable=False)
-    order_status: Mapped[str] = mapped_column(String(15), default="pending")
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
+    date = db.Column(db.DateTime, nullable=False)
+    total = db.Column(db.Float, nullable=False)
+    status = db.Column(db.String(20), nullable=False)
+    user = relationship("User", back_populates="orders")
 
-    items: Mapped[List["MenuItem"]] = relationship(secondary=order_items, back_populates="orders")
-    user: Mapped["User"] = relationship(back_populates="orders")
+    def __repr__(self):
+        """
+        Provide a string representation of the Order object.
+
+        Returns:
+            str: A string representation of the Order.
+        """
+        return f'<Order {self.id} by User {self.user_id}>'
