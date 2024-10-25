@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 """Defines the backend entry point"""
 import os
+from config import config
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_cors import CORS
 from flask_bcrypt import Bcrypt
+from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-
-from config import config
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -42,6 +41,7 @@ def create_app(config_name='default'):
     limiter.init_app(app)
     CORS(app, resources={r"/*": {"origins": app.config['ALLOWED_ORIGINS']}})
 
+    # Register Blueprints
     from routes import auth
     app.register_blueprint(auth.bp)
 
