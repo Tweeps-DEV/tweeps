@@ -1,6 +1,6 @@
 # Tweeps
 
-Tweeps is a comprehensive food ordering platform with features for managing orders, customizing food items, and handling employee management. Built with React for the frontend and Flask for the backend, it provides a seamless experience for users and administrators alike.
+Tweeps is a comprehensive food ordering platform with features for managing orders, customizing food items, and handling employee management. Built with NextJS for the frontend and Flask for the backend, it provides a seamless experience for users and administrators alike.
 
 ## Features
 
@@ -15,8 +15,7 @@ Tweeps is a comprehensive food ordering platform with features for managing orde
 1. [Installation](#installation)
 2. [Configuration](#configuration)
 3. [Usage](#usage)
-4. [Folder Structure](#folder-structure)
-5. [License](#license)
+4. [License](#license)
 
 ## Installation
 
@@ -49,7 +48,7 @@ Tweeps is a comprehensive food ordering platform with features for managing orde
 
 5. **Run the Flask application**:
    ```bash
-   python manage.py run
+   flask run
    ```
 
 ### Frontend Setup
@@ -90,11 +89,6 @@ To run the application using Docker:
   - `SECRET_KEY`: A secret key for Flask.
   - Other environment-specific configurations.
 
-### Frontend Configuration
-
-- Update the `.env` file in the `frontend` directory to include:
-  - `REACT_APP_API_URL`: URL for the backend API.
-
 ## Usage
 
 ### User Flow
@@ -109,38 +103,6 @@ To run the application using Docker:
 1. **Access Admin Panel**: Navigate to `admin.tweeps.yourdomain.com` to access the admin dashboard.
 2. **Manage Employees**: Add, update, or remove employees.
 3. **Monitor Orders**: View and manage all incoming orders.
-
-## Folder Structure
-
-```plaintext
-tweeps/
-├── backend/
-│   ├── app/
-│   │   ├── __init__.py
-│   │   ├── models.py
-│   │   ├── routes.py
-│   │   ├── auth.py
-│   │   ├── config.py
-│   ├── tests/
-│   ├── migrations/
-│   ├── venv/
-│   ├── .env
-│   ├── manage.py
-│   └── requirements.txt
-├── frontend/
-│   ├── public/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── App.js
-│   │   ├── index.js
-│   ├── .env
-│   ├── package.json
-│   ├── package-lock.json
-├── .gitignore
-├── README.md
-└── docker-compose.yml
-```
 
 ## License
 
