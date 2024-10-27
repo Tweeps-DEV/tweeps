@@ -1,9 +1,9 @@
 #!usr/bin/env python3
 """Defines an Order model"""
-from .basemodel import BaseModel
-from app import db
-from sqlalchemy.orm import relationship
 import uuid
+from app import db
+from .basemodel import BaseModel
+from sqlalchemy.orm import relationship
 
 class Order(BaseModel):
     """
