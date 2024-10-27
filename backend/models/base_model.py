@@ -18,7 +18,7 @@ class BaseModel(db.Model):
 
     __abstract__ = True
 
-    id = db.Column(db.String(30), primary_key=True, default=lambda: str(uuid.uuid4()), unique=True, nullable=False)
+    id = db.Column(db.String(40), primary_key=True, default=lambda: str(uuid.uuid4()), unique=True, nullable=False)
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
     updated_at = db.Column(db.DateTime(timezone=True), onupdate=func.now())
 
