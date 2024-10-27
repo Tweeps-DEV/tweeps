@@ -40,12 +40,6 @@ class User(BaseModel):
         """Check if the provided password matches the user's stored password hash."""
         return bcrypt.check_password_hash(self.password_hash, password)
 
-    @staticmethod
-    def is_valid_email(email):
-        """Validate an email address."""
-        email_regex = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
-        return bool(email_regex.match(email))
-
     def __repr__(self):
         """Provide a string representation of the User object."""
         return f'<User {self.username} (ID: {self.id})>'
