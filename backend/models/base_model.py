@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Defines a basemodel that all the other models inherit from"""
-from app import db
 import uuid
-from sqlalchemy.sql import func
+from app import db
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.sql import func
 
 class BaseModel(db.Model):
     """
