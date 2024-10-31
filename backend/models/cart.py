@@ -5,6 +5,7 @@ from .base_model import BaseModel
 from sqlalchemy import ForeignKey, Float
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+
 class Cart(BaseModel):
     """
     Represents a cart in the system.
@@ -64,7 +65,9 @@ class Cart(BaseModel):
         if menu_item_id not in self.items:
             return
 
-        if quantity is None or quantity >= self.items[menu_item_id]["quantity"]:
+        more_stuff = quantity >= self.items[menu_item_id]["quantity"]
+
+        if quantity is None or more_stuff:
             del self.items[menu_item_id]
         else:
             self.items[menu_item_id]["quantity"] -= quantity

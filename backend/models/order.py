@@ -5,11 +5,13 @@ from app import db
 from .base_model import BaseModel
 from sqlalchemy.orm import relationship
 
+
 class Order(BaseModel):
     """
     Represents an order in the system.
 
-    This class defines the structure of Order objects and their relationship to Users.
+    This class defines the structure of Order objects
+    and their relationship to Users.
 
     Attributes:
         user_id (str): The UUID of the user who placed the order.
@@ -22,7 +24,9 @@ class Order(BaseModel):
 
     __tablename__ = "orders"
 
-    user_id = db.Column(db.String(40), db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(db.String(40),
+                        db.ForeignKey('users.id'),
+                        nullable=False)
     date = db.Column(db.DateTime, nullable=False)
     total = db.Column(db.Float, nullable=False)
     status = db.Column(db.String(20), nullable=False)

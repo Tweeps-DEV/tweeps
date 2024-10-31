@@ -15,12 +15,14 @@ migrate = Migrate()
 bcrypt = Bcrypt()
 limiter = Limiter(key_func=get_remote_address)
 
+
 def create_app(config_name='default'):
     """
     Create and configure an instance of the Flask application.
 
     Args:
-        config_name (str): The name of the configuration to use. Defaults to 'default'.
+        config_name (str): The name of the configuration to use.
+        Defaults to 'default'.
 
     Returns:
         Flask: A configured Flask application instance.
@@ -39,13 +41,15 @@ def create_app(config_name='default'):
     migrate.init_app(app, db)
     bcrypt.init_app(app)
     limiter.init_app(app)
-    CORS(app, resources={r"/*": {"origins": app.config['ALLOWED_ORIGINS']}})
+    CORS(app,
+         resources={r"/*": {"origins": app.config['ALLOWED_ORIGINS']}})
 
     # Register Blueprints
     from routes import auth
     app.register_blueprint(auth.bp)
 
     return app
+
 
 if __name__ == '__main__':
     app = create_app(os.getenv('FLASK_ENV', 'default'))
