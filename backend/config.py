@@ -19,9 +19,9 @@ class Config:
 
     """
     SECRET_KEY = os.getenv('SECRET_KEY')
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URI')
+    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', 'sqlite:///test.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS').split(',')
+    ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', '').split(',')
 
 class DevelopmentConfig(Config):
     """

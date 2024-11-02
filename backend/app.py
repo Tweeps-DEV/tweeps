@@ -1,52 +1,26 @@
 #!/usr/bin/env python3
 """Defines the backend entry point"""
-import os
-from config import config
+from config import Config
 from flask import Flask
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager
 from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
-db = SQLAlchemy()
-migrate = Migrate()
-bcrypt = Bcrypt()
-limiter = Limiter(key_func=get_remote_address)
+app = Flask(__name__)
+app.config.from_object(Config)
 
-def create_app(config_name='default'):
-    """
-    Create and configure an instance of the Flask application.
+CORS(app)
+bcrypt = Bcrypt(app)
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+jwt = JWTManager(app)
+limiter = Limiter(app)
 
-    Args:
-        config_name (str): The name of the configuration to use. Defaults to 'default'.
+from backend.routes import auth  # Import routes after creating the app
+app.register_blueprint(auth.bp)
 
-    Returns:
-        Flask: A configured Flask application instance.
-
-    This function:
-    1. Creates a new Flask app instance
-    2. Loads the configuration based on the provided config_name
-    3. Initializes all extensions with this app instance
-    4. Sets up CORS with allowed origins from the config
-    5. Registers blueprints for authentication and main routes
-    """
-    app = Flask(__name__)
-    app.config.from_object(config[config_name])
-
-    db.init_app(app)
-    migrate.init_app(app, db)
-    bcrypt.init_app(app)
-    limiter.init_app(app)
-    CORS(app, resources={r"/*": {"origins": app.config['ALLOWED_ORIGINS']}})
-
-    # Register Blueprints
-    from routes import auth
-    app.register_blueprint(auth.bp)
-
-    return app
-
-if __name__ == '__main__':
-    app = create_app(os.getenv('FLASK_ENV', 'default'))
+if __name__ == "__main__":
     app.run()

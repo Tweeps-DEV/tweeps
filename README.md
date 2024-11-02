@@ -1,109 +1,73 @@
-# Tweeps
+# Tweeps Fastfoods Backend Unit Tests
 
-Tweeps is a comprehensive food ordering platform with features for managing orders, customizing food items, and handling employee management. Built with NextJS for the frontend and Flask for the backend, it provides a seamless experience for users and administrators alike.
+## Description
 
-## Features
+Tests are important to prevent breaking the production environment. This document covers the creation of unit tests for the backend services of Tweeps Fastfoods. These tests ensure that individual components behave as expected, including the core models (like Orders, Users, and BaseModel). This helps maintain code quality by validating that each function, method, and class performs according to the expected logic.
 
-- **User Authentication**: Sign up and log in to manage orders.
-- **Order Management**: Place orders with customizable toppings.
-- **Order Tracking**: Track your order in real-time with a map view.
-- **Admin Dashboard**: Manage employees and monitor orders from a dedicated admin panel.
-- **Payment Integration**: Secure payment processing for orders.
+## Steps Taken
 
-## Table of Contents
+1. **Set Up Testing Environment**:
+    - Created a virtual environment and installed necessary packages:
+      ```bash
+      python3 -m venv .venv
+      source .venv/bin/activate
+      pip install Flask pytest pytest-mock coverage
+      ```
 
-1. [Installation](#installation)
-2. [Configuration](#configuration)
-3. [Usage](#usage)
-4. [License](#license)
+2. **Created Test Directory**:
+    - Created a directory for tests:
+      ```bash
+      mkdir backend/tests
+      ```
 
-## Installation
+3. **Wrote Unit Tests for BaseModel**:
+    - Created `backend/tests/test_base_model.py` and wrote tests for `BaseModel`.
 
-### Prerequisites
+4. **Wrote Unit Tests for Orders Model**:
+    - Created `backend/tests/test_order.py` and wrote tests for `Order`.
 
-- Python 3.x
-- Node.js (v16 or later)
-- Docker (optional, for containerized deployment)
+5. **Wrote Unit Tests for User Model**:
+    - Created `backend/tests/test_user.py` and wrote tests for `User`.
 
-### Backend Setup
+6. **Wrote Unit Tests for Auth Route**:
+    - Created `backend/tests/test_auth.py` and wrote tests for authentication routes.
 
-1. **Navigate to the `backend` directory**:
-   ```bash
-   cd backend
-   ```
+7. **Ran Tests with Coverage**:
+    - Ran the tests and generated a coverage report:
+      ```bash
+      coverage run -m pytest backend/tests/
+      coverage report -m
+      ```
 
-2. **Create and activate a virtual environment**:
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate
-   ```
+## Acceptance Criteria
 
-3. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+- Unit tests cover all core models and their key methods.
+- All tests must pass with appropriate assertions to verify correctness.
+- Mock any external dependencies to ensure the unit tests remain isolated.
+- Ensure 100% unit test coverage of critical logic.
 
-4. **Set up environment variables**:
-   - Create a `.env` file in the `backend` directory with necessary configuration (e.g., database URL, secret keys).
+## Commenting Conventions
 
-5. **Run the Flask application**:
-   ```bash
-   flask run
-   ```
+- **Test Cases**: Use descriptive comments at the start of each test to explain what it validates.
+- **Edge Case Handling**: Use `# Edge Case` comments to highlight special scenarios tested.
+- **Mocked Dependencies**: Mock services or external dependencies to isolate the logic.
 
-### Frontend Setup
+## Example
 
-1. **Navigate to the `frontend` directory**:
-   ```bash
-   cd frontend
-   ```
+```python
+# Test that save() method correctly stores the instance
+def test_save_method(self):
+  obj = BaseModel()
+  obj.save()
+  self.assertIn(obj, models.storage.all().values())
 
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
+# Edge Case: Test creating an order with an empty item list
+def test_empty_order_items(self):
+  order = Orders(items=[])
+  self.assertEqual(len(order.items), 0)
 
-3. **Set up environment variables**:
-   - Create a `.env` file in the `frontend` directory with necessary configuration (e.g., API URL).
-
-4. **Start the React development server**:
-   ```bash
-   npm start
-   ```
-
-### Docker Setup (Optional)
-
-To run the application using Docker:
-
-1. **Build and start containers**:
-   ```bash
-   docker-compose up --build
-   ```
-
-## Configuration
-
-### Backend Configuration
-
-- Update the `.env` file in the `backend` directory to include:
-  - `DATABASE_URL`: URL for the database connection.
-  - `SECRET_KEY`: A secret key for Flask.
-  - Other environment-specific configurations.
-
-## Usage
-
-### User Flow
-
-1. **Sign Up/Log In**: Create a new account or log in to an existing one.
-2. **Place Order**: Select items and customize with optional toppings.
-3. **Track Order**: Use the track button to view your order on a map.
-4. **Payment**: Complete the payment process securely.
-
-### Admin Flow
-
-1. **Access Admin Panel**: Navigate to `admin.tweeps.yourdomain.com` to access the admin dashboard.
-2. **Manage Employees**: Add, update, or remove employees.
-3. **Monitor Orders**: View and manage all incoming orders.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+@patch("models.storage.save")
+def test_save_calls_storage(self, mock_save):
+  obj = BaseModel()
+  obj.save()
+  mock_save.assert_called_once()
