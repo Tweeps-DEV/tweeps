@@ -1,9 +1,17 @@
 # backend/tests/test_order.py
 import unittest
+from backend.app import create_app
 from backend.models.order import Order
-from unittest.mock import patch
 
 class TestOrder(unittest.TestCase):
+
+    def setUp(self):
+        self.app = create_app()
+        self.app_context = self.app.app_context()
+        self.app_context.push()
+
+    def tearDown(self):
+        self.app_context.pop()
 
     def test_order_creation(self):
         order = Order(items=['item1', 'item2'])

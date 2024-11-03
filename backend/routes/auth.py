@@ -3,14 +3,14 @@ import datetime
 import jwt
 import logging
 import os
-from app import db, limiter
+from flask import Blueprint, request, jsonify, url_for, redirect, current_app
 from dotenv import load_dotenv
-from flask import Blueprint, request, jsonify, current_app
 from flask_cors import CORS
 from functools import wraps
 from logging.handlers import RotatingFileHandler
 from marshmallow import Schema, fields, validate, ValidationError
 from models.user import User
+from backend.extensions import db, limiter
 
 # Load environment variables
 load_dotenv()
@@ -94,7 +94,7 @@ def login():
             return jsonify({'message': 'Invalid credentials!'}), 401
 
         token = jwt.encode(
-            {'user_id': user.id, 'exp': datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=24)},
+            {'user_id': user.id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)},
             current_app.config['SECRET_KEY'],
             algorithm="HS256"
         )

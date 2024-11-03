@@ -1,12 +1,12 @@
 # backend/tests/test_auth.py
 import unittest
-from backend.app import app
+from backend.app import create_app
 from unittest.mock import patch
 
 class TestAuth(unittest.TestCase):
 
     def setUp(self):
-        self.app = app.test_client()
+        self.app = create_app().test_client()
         self.app.testing = True
 
     def test_signup(self):

@@ -1,7 +1,7 @@
 #!usr/bin/env python3
 """Defines an Order model"""
 import uuid
-from app import db
+from backend.extensions import db  # Updated import
 from models.base_model import BaseModel  # Updated import
 from sqlalchemy.orm import relationship
 
@@ -24,7 +24,7 @@ class Order(BaseModel):
     __table_args__ = {'extend_existing': True}  # Add this line
 
     id = db.Column(db.Integer, primary_key=True)  # Add this line
-    items = db.Column(db.String(255), nullable=False)  # Add this line
+    items = db.Column(db.PickleType, nullable=False)  # Updated type
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # Updated type
     date = db.Column(db.DateTime, nullable=False)
     total = db.Column(db.Float, nullable=False)
