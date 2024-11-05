@@ -1,73 +1,97 @@
-# Tweeps Fastfoods Backend Unit Tests
+# Project Tweeps - Test Report
 
-## Description
+## Overview
 
-Tests are important to prevent breaking the production environment. This document covers the creation of unit tests for the backend services of Tweeps Fastfoods. These tests ensure that individual components behave as expected, including the core models (like Orders, Users, and BaseModel). This helps maintain code quality by validating that each function, method, and class performs according to the expected logic.
+This document provides a detailed report of the tests conducted for the Project Tweeps application. It includes the status of the application, the tests performed, and best practices for maintaining and writing tests.
 
-## Steps Taken
+## Application State
 
-1. **Set Up Testing Environment**:
-    - Created a virtual environment and installed necessary packages:
-      ```bash
-      python3 -m venv .venv
-      source .venv/bin/activate
-      pip install Flask pytest pytest-mock coverage
-      ```
+The Project Tweeps application is a web-based platform that allows users to manage orders, menu items, and carts. The application is built using Flask and SQLAlchemy, and it includes models for users, menu items, orders, and carts.
 
-2. **Created Test Directory**:
-    - Created a directory for tests:
-      ```bash
-      mkdir backend/tests
-      ```
+## Tests Conducted
 
-3. **Wrote Unit Tests for BaseModel**:
-    - Created `backend/tests/test_base_model.py` and wrote tests for `BaseModel`.
+### Test Setup
 
-4. **Wrote Unit Tests for Orders Model**:
-    - Created `backend/tests/test_order.py` and wrote tests for `Order`.
+The tests are written using the `pytest` framework and are located in the `backend/tests` directory. The tests use fixtures to set up the application and database for testing.
 
-5. **Wrote Unit Tests for User Model**:
-    - Created `backend/tests/test_user.py` and wrote tests for `User`.
+#### Fixtures
 
-6. **Wrote Unit Tests for Auth Route**:
-    - Created `backend/tests/test_auth.py` and wrote tests for authentication routes.
+- `test_app`: Sets up the Flask application for testing.
+- `session`: Provides a database session for testing.
+- `client`: Provides a Flask test client for testing routes.
 
-7. **Ran Tests with Coverage**:
-    - Ran the tests and generated a coverage report:
-      ```bash
-      coverage run -m pytest backend/tests/
-      coverage report -m
-      ```
+### Test Cases
 
-## Acceptance Criteria
+#### BaseModel Unit Tests
 
-- Unit tests cover all core models and their key methods.
-- All tests must pass with appropriate assertions to verify correctness.
-- Mock any external dependencies to ensure the unit tests remain isolated.
-- Ensure 100% unit test coverage of critical logic.
+- **Test Object Initialization**: Tests object initialization with and without keyword arguments.
+- **Test Save Method**: Tests the `save()` method to ensure objects are correctly stored.
+- **Test Delete Method**: Tests the `delete()` method for proper instance removal from storage.
+- **Test to_dict Method**: Verifies the `to_dict()` method returns accurate dictionaries.
 
-## Commenting Conventions
+#### Orders Model Unit Tests
 
-- **Test Cases**: Use descriptive comments at the start of each test to explain what it validates.
-- **Edge Case Handling**: Use `# Edge Case` comments to highlight special scenarios tested.
-- **Mocked Dependencies**: Mock services or external dependencies to isolate the logic.
+- **Test Order Creation**: Tests order creation with valid and invalid data.
+- **Test Multiple Items**: Ensures orders can store multiple items (list of items).
+- **Test Adding Items Without Toppings**: Validates the behavior when adding items without toppings (since toppings are free).
+- **Test Unique Order ID Generation**: Tests unique order ID generation logic.
 
-## Example
+#### Users Model Unit Tests
 
-```python
-# Test that save() method correctly stores the instance
-def test_save_method(self):
-  obj = BaseModel()
-  obj.save()
-  self.assertIn(obj, models.storage.all().values())
+- **Test User Creation**: Validates User creation with correct data inputs.
+- **Test User Linkage**: Tests that Users are linked to required models.
+- **Test User Storage**: Verifies correct storage behavior of User objects.
 
-# Edge Case: Test creating an order with an empty item list
-def test_empty_order_items(self):
-  order = Orders(items=[])
-  self.assertEqual(len(order.items), 0)
+#### Cart Model Unit Tests
 
-@patch("models.storage.save")
-def test_save_calls_storage(self, mock_save):
-  obj = BaseModel()
-  obj.save()
-  mock_save.assert_called_once()
+- **Test Add Item to Cart**: Tests adding an item to a cart.
+- **Test Update Cart Quantity**: Tests updating the quantity of an item in the cart.
+- **Test Delete Cart Item**: Tests deleting an item from the cart.
+
+#### MenuItem Model Unit Tests
+
+- **Test MenuItem Creation**: Tests the creation of a menu item.
+- **Test MenuItem Storage**: Verifies correct storage behavior of MenuItem objects.
+
+#### Auth Route Unit Tests
+
+- **Test User Signup**: Tests the user signup route.
+- **Test User Login**: Tests the user login route.
+
+### Test Log
+
+The following is an excerpt from the `pytest.log` file, which contains the log for the tests conducted:
+
+```log
+========================================== test session starts ===========================================
+platform linux -- Python 3.10.12, pytest-8.3.3, pluggy-1.5.0
+rootdir: /home/ivan/project/tweeps
+plugins: mock-3.14.0
+collected 18 items                                                                                        
+
+backend/tests/test_models.py::test_create_order PASSED                                             [  5%]
+backend/tests/test_models.py::test_update_order_status PASSED                                      [ 11%]
+backend/tests/test_models.py::test_delete_order PASSED                                             [ 16%]
+backend/tests/test_models.py::test_add_item_to_cart PASSED                                         [ 22%]
+backend/tests/test_models.py::test_update_cart_quantity PASSED                                     [ 27%]
+backend/tests/test_models.py::test_delete_cart_item PASSED                                         [ 33%]
+backend/tests/test_models.py::test_base_model_initialization PASSED                                [ 38%]
+backend/tests/test_models.py::test_base_model_save PASSED                                          [ 44%]
+backend/tests/test_models.py::test_base_model_delete PASSED                                        [ 50%]
+backend/tests/test_models.py::test_base_model_to_dict PASSED                                       [ 55%]
+backend/tests/test_models.py::test_order_multiple_items PASSED                                     [ 61%]
+backend/tests/test_models.py::test_order_items_without_toppings PASSED                             [ 66%]
+backend/tests/test_models.py::test_unique_order_id PASSED                                          [ 72%]
+backend/tests/test_models.py::test_create_user PASSED                                              [ 77%]
+backend/tests/test_models.py::test_user_linkage PASSED                                             [ 83%]
+backend/tests/test_models.py::test_user_storage PASSED                                             [ 88%]
+backend/tests/test_models.py::test_create_menu_item PASSED                                         [ 94%]
+backend/tests/test_models.py::test_menu_item_storage PASSED                                        [100%]
+
+============================================ warnings summary ============================================
+backend/tests/test_models.py::test_create_order
+  /home/ivan/project/tweeps/.venv/lib/python3.10/site-packages/flask_limiter/extension.py:333: UserWarning: Using the in-memory storage for tracking rate limits as no storage was explicitly specified. This is not recommended for production use. See: https://flask-limiter.readthedocs.io#configuring-a-storage-backend for documentation about configuring the storage backend.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+===================================== 18 passed, 1 warning in 3.09s ======================================
