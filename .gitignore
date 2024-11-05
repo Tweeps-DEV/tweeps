@@ -1,16 +1,13 @@
-# Python
-backend/venv/
-backend/*__pycache__/
-backend/*.pyc
-backend/*.pyo
-backend/.env
-backend/migrations/
-
-# Node
-frontend/node_modules/
-frontend/.env
-
-# Docker
-*.log
-*.pid
-*.sqlite3
+app.log
+app.log.1
+backend/app.log
+pytest.log
+test.db
+backend/test.db
+instance/test.db
+__pycache__/
+backend/__pycache__/
+backend/models/__pycache__/
+backend/routes/__pycache__/
+backend/tests/__pycache__/
+.venv/
