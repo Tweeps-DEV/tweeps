@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Defines a user model"""
+import re
 from backend.extensions import bcrypt, db
 from models.base_model import BaseModel
 from models.order import Order
-import re
+
 
 class User(BaseModel):
     """
@@ -33,7 +34,8 @@ class User(BaseModel):
 
     def set_password(self, password):
         """Set the user's password."""
-        self.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
+        password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
+        self.password_hash = password_hash
 
     def check_password(self, password):
         """Check if the provided password matches the user's stored password hash."""

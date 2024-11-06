@@ -5,11 +5,13 @@ from backend.extensions import db  # Updated import
 from models.base_model import BaseModel  # Updated import
 from sqlalchemy.orm import relationship
 
+
 class Order(BaseModel):
     """
     Represents an order in the system.
 
-    This class defines the structure of Order objects and their relationship to Users.
+    This class defines the structure of Order objects
+    and their relationship to Users.
 
     Attributes:
         user_id (str): The UUID of the user who placed the order.
@@ -17,7 +19,7 @@ class Order(BaseModel):
         total (float): The total amount of the order.
         status (str): The current status of the order.
         user (relationship): Relationship to the user who placed the order.
-
+        items (PickleType): The items in the order.
     """
 
     __tablename__ = "orders"
@@ -25,7 +27,7 @@ class Order(BaseModel):
 
     id = db.Column(db.Integer, primary_key=True)  # Add this line
     items = db.Column(db.PickleType, nullable=False)  # Updated type
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # Updated type
+    user_id = db.Column(db.String(40), db.ForeignKey('users.id'), nullable=False)  # Updated type
     date = db.Column(db.DateTime, nullable=False)
     total = db.Column(db.Float, nullable=False)
     status = db.Column(db.String(20), nullable=False)

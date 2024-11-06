@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 class Config:
     """
     Base configuration class.
@@ -23,11 +24,13 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', '').split(',')
 
+
 class DevelopmentConfig(Config):
     """
     Development configuration.
 
-    This class contains configuration settings specific to the development environment.
+    This class contains configuration settings
+    specific to the development environment.
 
     Attributes:
         DEBUG (bool): Flag to enable debug mode.
@@ -35,11 +38,13 @@ class DevelopmentConfig(Config):
     """
     DEBUG = True
 
+
 class ProductionConfig(Config):
     """
     Production configuration.
 
-    This class contains configuration settings specific to the production environment.
+    This class contains configuration settings
+    specific to the production environment.
 
     Attributes:
         DEBUG (bool): Flag to disable debug mode.
@@ -47,11 +52,13 @@ class ProductionConfig(Config):
     """
     DEBUG = False
 
+
 class TestingConfig(Config):
     """
     Testing configuration.
 
-    This class contains configuration settings specific to the testing environment.
+    This class contains configuration settings
+    specific to the testing environment.
 
     Attributes:
         TESTING (bool): Flag to enable testing mode.
@@ -60,6 +67,7 @@ class TestingConfig(Config):
     """
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+
 
 config = {
     'development': DevelopmentConfig,

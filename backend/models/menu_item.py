@@ -6,6 +6,7 @@ from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.exc import SQLAlchemyError
 from flask_login import current_user
 
+
 class MenuItem(BaseModel):
     """
     Represents a menu item in the system.
@@ -20,7 +21,8 @@ class MenuItem(BaseModel):
         image_url (str): URL to the menu item's image
         is_available (bool): Whether the item is currently available
         toppings (list): Optional list of available toppings
-        category (str): The category this item belongs to (e.g., "Burgers", "Drinks")
+        category (str): The category this item belongs to
+        (e.g., "Burgers", "Drinks")
     """
 
     __tablename__ = "menu_items"
