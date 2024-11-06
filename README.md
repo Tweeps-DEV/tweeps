@@ -1,109 +1,97 @@
-# Tweeps
+# Project Tweeps - Test Report
 
-Tweeps is a comprehensive food ordering platform with features for managing orders, customizing food items, and handling employee management. Built with NextJS for the frontend and Flask for the backend, it provides a seamless experience for users and administrators alike.
+## Overview
 
-## Features
+This document provides a detailed report of the tests conducted for the Project Tweeps application. It includes the status of the application, the tests performed, and best practices for maintaining and writing tests.
 
-- **User Authentication**: Sign up and log in to manage orders.
-- **Order Management**: Place orders with customizable toppings.
-- **Order Tracking**: Track your order in real-time with a map view.
-- **Admin Dashboard**: Manage employees and monitor orders from a dedicated admin panel.
-- **Payment Integration**: Secure payment processing for orders.
+## Application State
 
-## Table of Contents
+The Project Tweeps application is a web-based platform that allows users to manage orders, menu items, and carts. The application is built using Flask and SQLAlchemy, and it includes models for users, menu items, orders, and carts.
 
-1. [Installation](#installation)
-2. [Configuration](#configuration)
-3. [Usage](#usage)
-4. [License](#license)
+## Tests Conducted
 
-## Installation
+### Test Setup
 
-### Prerequisites
+The tests are written using the `pytest` framework and are located in the `backend/tests` directory. The tests use fixtures to set up the application and database for testing.
 
-- Python 3.x
-- Node.js (v16 or later)
-- Docker (optional, for containerized deployment)
+#### Fixtures
 
-### Backend Setup
+- `test_app`: Sets up the Flask application for testing.
+- `session`: Provides a database session for testing.
+- `client`: Provides a Flask test client for testing routes.
 
-1. **Navigate to the `backend` directory**:
-   ```bash
-   cd backend
-   ```
+### Test Cases
 
-2. **Create and activate a virtual environment**:
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate
-   ```
+#### BaseModel Unit Tests
 
-3. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+- **Test Object Initialization**: Tests object initialization with and without keyword arguments.
+- **Test Save Method**: Tests the `save()` method to ensure objects are correctly stored.
+- **Test Delete Method**: Tests the `delete()` method for proper instance removal from storage.
+- **Test to_dict Method**: Verifies the `to_dict()` method returns accurate dictionaries.
 
-4. **Set up environment variables**:
-   - Create a `.env` file in the `backend` directory with necessary configuration (e.g., database URL, secret keys).
+#### Orders Model Unit Tests
 
-5. **Run the Flask application**:
-   ```bash
-   flask run
-   ```
+- **Test Order Creation**: Tests order creation with valid and invalid data.
+- **Test Multiple Items**: Ensures orders can store multiple items (list of items).
+- **Test Adding Items Without Toppings**: Validates the behavior when adding items without toppings (since toppings are free).
+- **Test Unique Order ID Generation**: Tests unique order ID generation logic.
 
-### Frontend Setup
+#### Users Model Unit Tests
 
-1. **Navigate to the `frontend` directory**:
-   ```bash
-   cd frontend
-   ```
+- **Test User Creation**: Validates User creation with correct data inputs.
+- **Test User Linkage**: Tests that Users are linked to required models.
+- **Test User Storage**: Verifies correct storage behavior of User objects.
 
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
+#### Cart Model Unit Tests
 
-3. **Set up environment variables**:
-   - Create a `.env` file in the `frontend` directory with necessary configuration (e.g., API URL).
+- **Test Add Item to Cart**: Tests adding an item to a cart.
+- **Test Update Cart Quantity**: Tests updating the quantity of an item in the cart.
+- **Test Delete Cart Item**: Tests deleting an item from the cart.
 
-4. **Start the React development server**:
-   ```bash
-   npm start
-   ```
+#### MenuItem Model Unit Tests
 
-### Docker Setup (Optional)
+- **Test MenuItem Creation**: Tests the creation of a menu item.
+- **Test MenuItem Storage**: Verifies correct storage behavior of MenuItem objects.
 
-To run the application using Docker:
+#### Auth Route Unit Tests
 
-1. **Build and start containers**:
-   ```bash
-   docker-compose up --build
-   ```
+- **Test User Signup**: Tests the user signup route.
+- **Test User Login**: Tests the user login route.
 
-## Configuration
+### Test Log
 
-### Backend Configuration
+The following is an excerpt from the `pytest.log` file, which contains the log for the tests conducted:
 
-- Update the `.env` file in the `backend` directory to include:
-  - `DATABASE_URL`: URL for the database connection.
-  - `SECRET_KEY`: A secret key for Flask.
-  - Other environment-specific configurations.
+```log
+========================================== test session starts ===========================================
+platform linux -- Python 3.10.12, pytest-8.3.3, pluggy-1.5.0
+rootdir: /home/ivan/project/tweeps
+plugins: mock-3.14.0
+collected 18 items                                                                                        
 
-## Usage
+backend/tests/test_models.py::test_create_order PASSED                                             [  5%]
+backend/tests/test_models.py::test_update_order_status PASSED                                      [ 11%]
+backend/tests/test_models.py::test_delete_order PASSED                                             [ 16%]
+backend/tests/test_models.py::test_add_item_to_cart PASSED                                         [ 22%]
+backend/tests/test_models.py::test_update_cart_quantity PASSED                                     [ 27%]
+backend/tests/test_models.py::test_delete_cart_item PASSED                                         [ 33%]
+backend/tests/test_models.py::test_base_model_initialization PASSED                                [ 38%]
+backend/tests/test_models.py::test_base_model_save PASSED                                          [ 44%]
+backend/tests/test_models.py::test_base_model_delete PASSED                                        [ 50%]
+backend/tests/test_models.py::test_base_model_to_dict PASSED                                       [ 55%]
+backend/tests/test_models.py::test_order_multiple_items PASSED                                     [ 61%]
+backend/tests/test_models.py::test_order_items_without_toppings PASSED                             [ 66%]
+backend/tests/test_models.py::test_unique_order_id PASSED                                          [ 72%]
+backend/tests/test_models.py::test_create_user PASSED                                              [ 77%]
+backend/tests/test_models.py::test_user_linkage PASSED                                             [ 83%]
+backend/tests/test_models.py::test_user_storage PASSED                                             [ 88%]
+backend/tests/test_models.py::test_create_menu_item PASSED                                         [ 94%]
+backend/tests/test_models.py::test_menu_item_storage PASSED                                        [100%]
 
-### User Flow
+============================================ warnings summary ============================================
+backend/tests/test_models.py::test_create_order
+  /home/ivan/project/tweeps/.venv/lib/python3.10/site-packages/flask_limiter/extension.py:333: UserWarning: Using the in-memory storage for tracking rate limits as no storage was explicitly specified. This is not recommended for production use. See: https://flask-limiter.readthedocs.io#configuring-a-storage-backend for documentation about configuring the storage backend.
+    warnings.warn(
 
-1. **Sign Up/Log In**: Create a new account or log in to an existing one.
-2. **Place Order**: Select items and customize with optional toppings.
-3. **Track Order**: Use the track button to view your order on a map.
-4. **Payment**: Complete the payment process securely.
-
-### Admin Flow
-
-1. **Access Admin Panel**: Navigate to `admin.tweeps.yourdomain.com` to access the admin dashboard.
-2. **Manage Employees**: Add, update, or remove employees.
-3. **Monitor Orders**: View and manage all incoming orders.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+===================================== 18 passed, 1 warning in 3.09s ======================================

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Defines a user model"""
 import re
-from app import bcrypt, db
-from .base_model import BaseModel
-from .order import Order
+from backend.extensions import bcrypt, db
+from models.base_model import BaseModel
+from models.order import Order
 
 
 class User(BaseModel):
@@ -23,15 +23,14 @@ class User(BaseModel):
         orders (relationship): Relationship to the user's orders.
     """
 
-    __tablename__ = "users"
+    __tablename__ = 'users'
+    __table_args__ = {'extend_existing': True}
 
-    username = db.Column(db.String(30), unique=True, nullable=False)
-    email = db.Column(db.String(60), unique=True, nullable=False)
-    phone_contact = db.Column(db.String(15))
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
-    address = db.Column(db.String(100))
-    is_admin = db.Column(db.Boolean, default=False)
-    orders = db.relationship("Order", back_populates="user")
+    orders = db.relationship('Order', backref='user', lazy=True)
 
     def set_password(self, password):
         """Set the user's password."""
@@ -39,9 +38,7 @@ class User(BaseModel):
         self.password_hash = password_hash
 
     def check_password(self, password):
-        """Check if the provided password matches the user's
-        stored password hash.
-        """
+        """Check if the provided password matches the user's stored password hash."""
         return bcrypt.check_password_hash(self.password_hash, password)
 
     def __repr__(self):

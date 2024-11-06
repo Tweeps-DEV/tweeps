@@ -1,17 +1,16 @@
-#!/usr/bin/env python3
-"""Defines auth routes"""
+# backend/routes/auth.py
 import datetime
 import jwt
 import logging
 import os
-from app import db, limiter
-from dotenv import load_dotenv
 from flask import Blueprint, request, jsonify, url_for, redirect, current_app
+from dotenv import load_dotenv
 from flask_cors import CORS
 from functools import wraps
 from logging.handlers import RotatingFileHandler
 from marshmallow import Schema, fields, validate, ValidationError
 from models.user import User
+from backend.extensions import db, limiter
 
 # Load environment variables
 load_dotenv()
@@ -22,7 +21,7 @@ handler = RotatingFileHandler('app.log', maxBytes=10000, backupCount=3)
 logging.getLogger().addHandler(handler)
 
 bp = Blueprint('auth', __name__)
-CORS(bp, resources={r"/*": {"origins": os.getenv("ALLOWED_ORIGINS").split(",")}})
+CORS(bp, resources={r"/*": {"origins": os.getenv("ALLOWED_ORIGINS", "").split(",")}})
 
 class UserSchema(Schema):
     username = fields.Str(required=True, validate=validate.Length(min=3, max=30))
@@ -35,24 +34,6 @@ class LoginSchema(Schema):
 
 # Authentication decorator
 def token_required(f):
-    """
-    A decorator to protect routes that require authentication.
-
-    This decorator:
-    1. Checks for the presence of a valid JWT token in the request header
-    2. Decodes and validates the token
-    3. Retrieves the user associated with the token
-
-    Args:
-        f (function): The view function to be decorated
-
-    Returns:
-        function: The decorated function
-
-    Raises:
-        401 Unauthorized: If the token is missing, invalid, or expired
-        500 Internal Server Error: If an unexpected error occurs during token validation
-    """
     @wraps(f)
     def decorated(*args, **kwargs):
         token = request.headers.get('Authorization')
@@ -60,14 +41,14 @@ def token_required(f):
             return jsonify({'message': 'Token is missing!'}), 401
         try:
             token = token.split(" ")[1]  # Remove 'Bearer ' prefix
-            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+            data = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=["HS256"])
             current_user = User.query.filter_by(id=data['id']).first()
         except jwt.ExpiredSignatureError:
             return jsonify({'message': 'Token has expired!'}), 401
         except jwt.InvalidTokenError:
             return jsonify({'message': 'Invalid token!'}), 401
         except Exception as e:
-            app.logger.error(f"Error in token_required: {str(e)}")
+            current_app.logger.error(f"Error in token_required: {str(e)}")
             return jsonify({'message': 'Something went wrong'}), 500
         return f(current_user, *args, **kwargs)
     return decorated
@@ -75,24 +56,6 @@ def token_required(f):
 @bp.route('/api/auth/signup', methods=['POST'])
 @limiter.limit("5 per minute")
 def signup():
-    """
-    Handle user signup requests.
-
-    This function:
-    1. Validates the incoming JSON data
-    2. Checks if the username or email already exists
-    3. Creates a new user with a hashed password
-    4. Adds the new user to the database
-
-    Returns:
-        tuple: A tuple containing a JSON response and an HTTP status code.
-            Success: ({'message': 'New user created!'}, 201)
-            Failure: (error_message, appropriate_status_code)
-
-    Raises:
-        400 Bad Request: If required fields are missing or if username/email already exists
-        500 Internal Server Error: If an unexpected error occurs during processing
-    """
     try:
         data = request.get_json()
         if not data:
@@ -122,24 +85,6 @@ def signup():
 @bp.route('/api/auth/login', methods=['POST'])
 @limiter.limit("10 per minute")
 def login():
-    """
-    Handle user login requests.
-
-    This function:
-    1. Validates the incoming authorization header
-    2. Checks if the user exists
-    3. Verifies the password
-    4. Generates a JWT token for authenticated users
-
-    Returns:
-        tuple: A tuple containing a JSON response and an HTTP status code.
-            Success: ({'token': jwt_token}, 200)
-            Failure: (error_message, appropriate_status_code)
-
-    Raises:
-        401 Unauthorized: If login credentials are invalid or missing
-        500 Internal Server Error: If an unexpected error occurs during processing
-    """
     try:
         data = request.get_json()
         LoginSchema().load(data)
