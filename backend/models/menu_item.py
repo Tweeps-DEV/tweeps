@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 """Defines MenuItem model with admin operations"""
-from app import db
-from .base_model import BaseModel
-from sqlalchemy.dialects.postgresql import ARRAY
+from backend.base import db
 from sqlalchemy.exc import SQLAlchemyError
 from flask_login import current_user
 
 
-class MenuItem(BaseModel):
+class MenuItem(db.Model):
     """
     Represents a menu item in the system.
 
@@ -27,13 +25,15 @@ class MenuItem(BaseModel):
 
     __tablename__ = "menu_items"
 
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text)
+    description = db.Column(db.String(200), nullable=True)
     price = db.Column(db.Float, nullable=False)
-    image_url = db.Column(db.String(255))
+    image_url = db.Column(db.String(200), nullable=True)
     is_available = db.Column(db.Boolean, default=True)
-    toppings = db.Column(ARRAY(db.String), default=[])
-    category = db.Column(db.String(50), nullable=False)
+    toppings = db.Column(db.String(200), nullable=True)
+    category = db.Column(db.String(50), nullable=True)
+    is_deal_of_the_day = db.Column(db.Boolean, default=False)
 
     @classmethod
     def create_menu_item(cls, **kwargs):
@@ -104,19 +104,32 @@ class MenuItem(BaseModel):
 
         menu_item.delete()
 
+    @classmethod
+    def get_deal_of_the_day(cls):
+        return cls.query.filter_by(is_deal_of_the_day=True).first()
+
+    @staticmethod
+    def get_menu_items():
+        categories = MenuItem.query.with_entities(MenuItem.category).distinct()
+        menu_items = {}
+        for category in categories:
+            menu_items[category] = MenuItem.query.filter_by(category=category).all()
+        return menu_items
+
     def to_dict(self):
         """Convert the menu item to a dictionary"""
         return {
-            **super().to_dict(),
+            'id': self.id,
             'name': self.name,
             'description': self.description,
             'price': self.price,
             'image_url': self.image_url,
             'is_available': self.is_available,
             'toppings': self.toppings,
-            'category': self.category
+            'category': self.category,
+            'is_deal_of_the_day': self.is_deal_of_the_day
         }
 
     def __repr__(self):
         """Provide a string representation of the MenuItem object."""
-        return f'<MenuItem {self.name} (ID: {self.id})>'
+        return f'<MenuItem {self.name}>'

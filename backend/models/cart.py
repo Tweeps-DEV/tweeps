@@ -1,9 +1,8 @@
-#!/usr/bin/enbv python3
+#!/usr/bin/env python3
 """Defines the user's cart"""
-from app import db
-from .base_model import BaseModel
-from sqlalchemy import ForeignKey, Float
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from backend.extensions import db
+from backend.models.base_model import BaseModel
+from backend.models.menu_item import MenuItem
 
 
 class Cart(BaseModel):
@@ -19,9 +18,8 @@ class Cart(BaseModel):
     """
     __tablename__ = "carts"
 
-    user_id = db.Column(db.String(40), ForeignKey('users.id'), nullable=False)
-    items = db.Column(db.JSON, default={})
-    total_price = db.Column(db.Float, default=0.0, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # Update this line
+    items = db.relationship('CartItem', backref='cart', lazy=True)  # Update this line
 
     def add_item(self, menu_item_id, quantity=1, selected_toppings=None):
         """

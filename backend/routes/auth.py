@@ -3,14 +3,14 @@ import datetime
 import jwt
 import logging
 import os
-from flask import Blueprint, request, jsonify, url_for, redirect, current_app
+from flask import Blueprint, request, jsonify, current_app
 from dotenv import load_dotenv
 from flask_cors import CORS
 from functools import wraps
 from logging.handlers import RotatingFileHandler
 from marshmallow import Schema, fields, validate, ValidationError
-from models.user import User
-from backend.extensions import db, limiter
+from backend.models.user import User
+from backend.extensions import db, limiter, bcrypt
 
 # Load environment variables
 load_dotenv()
@@ -71,8 +71,8 @@ def signup():
         if User.query.filter_by(username=data['username']).first():
             return jsonify({'message': 'Username already exists'}), 400
 
-        new_user = User(username=data['username'], email=data['email'])
-        new_user.set_password(data['password'])
+        hashed_password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
+        new_user = User(username=data['username'], email=data['email'], password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
         return jsonify({'message': 'New user created!'}), 201
@@ -90,7 +90,7 @@ def login():
         LoginSchema().load(data)
 
         user = User.query.filter_by(email=data['email']).first()
-        if not user or not user.check_password(data['password']):
+        if not user or not bcrypt.check_password_hash(user.password, data['password']):
             return jsonify({'message': 'Invalid credentials!'}), 401
 
         token = jwt.encode(

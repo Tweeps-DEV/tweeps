@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Defines a user model"""
 import re
-from backend.extensions import bcrypt, db
-from models.base_model import BaseModel
-from models.order import Order
+from backend.extensions import bcrypt
+from backend.base import db  # Update this line
+from backend.models.order import Order  # Update this line
 
 
-class User(BaseModel):
+class User(db.Model):  # Update this line
     """
     Represents a user in the system.
 

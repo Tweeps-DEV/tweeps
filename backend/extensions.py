@@ -1,9 +1,9 @@
 # backend/extensions.py
-from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
+from flask_bcrypt import Bcrypt
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
-bcrypt = Bcrypt()
 db = SQLAlchemy()
+bcrypt = Bcrypt()
 limiter = Limiter(key_func=get_remote_address)
