@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Defines MenuItem model with admin operations"""
-from app import db
-from .base_model import BaseModel
+from backend.extensions import db
+from models.base_model import BaseModel
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.exc import SQLAlchemyError
 from flask_login import current_user
