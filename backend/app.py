@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """Defines the backend entry point"""
+import os
+from backend.extensions import bcrypt, db, limiter
+from config import config
 from flask import Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
-from flask_jwt_extended import JWTManager
-from config import Config
-from backend.extensions import bcrypt, db, limiter
+
+migrate = Migrate()
+
 
 def create_app(config_name='default'):
     """
@@ -26,22 +29,21 @@ def create_app(config_name='default'):
     5. Registers blueprints for authentication and main routes
     """
     app = Flask(__name__)
-    app.config.from_object(Config)
+    app.config.from_object(config[config_name])
 
-    CORS(app, resources={r"/*": {"origins": app.config['ALLOWED_ORIGINS']}})
-    bcrypt.init_app(app)
     db.init_app(app)
-    migrate = Migrate(app, db)
-    jwt = JWTManager(app)
+    migrate.init_app(app, db)
+    bcrypt.init_app(app)
     limiter.init_app(app)
+    CORS(app,
+         resources={r"/*": {"origins": app.config['ALLOWED_ORIGINS']}})
 
-    register_blueprints(app)
+    # Register Blueprints
+    from routes import auth
+    app.register_blueprint(auth.bp)
 
     return app
 
-def register_blueprints(app):
-    from backend.routes.auth import bp as auth_bp  # Import routes inside the function
-    app.register_blueprint(auth_bp)
 
 if __name__ == '__main__':
     app = create_app(os.getenv('FLASK_ENV', 'default'))
