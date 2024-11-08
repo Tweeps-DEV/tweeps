@@ -1,4 +1,4 @@
-# backend/extensions.py
+#!/usr/bin/env python3
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 from flask_limiter import Limiter
