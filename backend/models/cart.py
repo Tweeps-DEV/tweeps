@@ -1,9 +1,8 @@
 #!/usr/bin/enbv python3
 """Defines the user's cart"""
-from app import db
-from .base_model import BaseModel
+from backend.extensions import db
+from models.base_model import BaseModel
 from sqlalchemy import ForeignKey, Float
-from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 
 class Cart(BaseModel):
