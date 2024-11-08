@@ -2,7 +2,6 @@
 """Defines a basemodel that all the other models inherit from"""
 import uuid
 from backend.extensions import db
-from backend.models.storage import save, delete
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql import func
 
