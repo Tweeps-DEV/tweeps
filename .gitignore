@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 app.log
 app.log.1
 backend/app.log
@@ -11,3 +12,22 @@ backend/models/__pycache__/
 backend/routes/__pycache__/
 backend/tests/__pycache__/
 .venv/
+=======
+# Python
+backend/venv/
+backend/__pycache__/
+backend/*/__pycache__/
+backend/*.pyc
+backend/*.pyo
+backend/.env
+backend/migrations/
+
+# Node
+frontend/node_modules/
+frontend/.env
+
+# Docker
+*.log
+*.pid
+*.sqlite3
+>>>>>>> 78f4c52 (Update gitignore file)
