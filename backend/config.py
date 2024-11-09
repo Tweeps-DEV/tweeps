@@ -20,7 +20,7 @@ class Config:
 
     """
     SECRET_KEY = os.getenv('SECRET_KEY')
-    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', 'sqlite:///test.db')
+    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', '').split(',')
 
@@ -66,7 +66,9 @@ class TestingConfig(Config):
 
     """
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    SQLALCHEMY_DATABASE_URI = os.getenv('TEST_DATABASE_URI')
+    RATELIMIT_STORAGE_URL = 'redis://localhost:6379/1'
+    RATELIMIT_ENABLED = False
 
 
 config = {
