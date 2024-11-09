@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 """Defines the backend entry point"""
 import os
-from backend.extensions import bcrypt, db, limiter
 from config import config
+from extensions import bcrypt, limiter
 from flask import Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
+from redis import Redis
 
+db = SQLAlchemy()
 migrate = Migrate()
 
 
@@ -34,6 +37,7 @@ def create_app(config_name='default'):
     db.init_app(app)
     migrate.init_app(app, db)
     bcrypt.init_app(app)
+    redis_client = Redis(host='localhost', port=6379, db=0)
     limiter.init_app(app)
     CORS(app,
          resources={r"/*": {"origins": app.config['ALLOWED_ORIGINS']}})
