@@ -136,7 +136,7 @@ class TestBaseModel(unittest.TestCase):
     def test_delete_success(self):
         """Test successful delete operation."""
         self.test_model.save()
-        self.test_model.delete()
+        self.test_model.hard_delete()
 
         deleted_model = TestModel.get_by_id(self.test_model.id)
         self.assertIsNone(deleted_model)
@@ -144,7 +144,7 @@ class TestBaseModel(unittest.TestCase):
     def test_delete_non_existent(self):
         """Test delete operation on non-existent record."""
         with self.assertRaises(SQLAlchemyError):
-            self.test_model.delete()
+            self.test_model.hard_delete()
 
     def test_update_success(self):
         """Test successful update operation."""
@@ -227,7 +227,7 @@ class TestBaseModel(unittest.TestCase):
         with patch.object(db.session, 'commit') as mock_commit:
             mock_commit.side_effect = SQLAlchemyError("Database error")
             with self.assertRaises(SQLAlchemyError):
-                self.test_model.delete()
+                self.test_model.hard_delete()
 
 
 if __name__ == '__main__':

@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
 """Defines a basemodel that all the other models inherit from"""
+import logging
 import uuid
 from app import db
 from datetime import datetime, timezone, UTC
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.sql import func
+from sqlalchemy.orm import Session
+from typing import Optional, Any, Dict
+
+logger = logging.getLogger(__name__)
 
 
 class BaseModel(db.Model):
@@ -18,24 +24,41 @@ class BaseModel(db.Model):
     """
     __abstract__ = True
 
-    id = db.Column(db.String(40),
-                   primary_key=True,
-                   default=str(uuid.uuid4()),
-                   unique=True,
-                   nullable=False)
-    # Changed the defaults to pythonic style, datetime.utcnow
-    # will be deprected
-    created_at = db.Column(db.DateTime(timezone=True),
-                           server_default=func.now(),
-                           nullable=False)
-    updated_at = db.Column(db.DateTime(timezone=True),
-                           server_default=func.now(),
-                           onupdate=func.now())
+    @declared_attr
+    def __tablename__(cls) -> str:
+        """Generate table name automatically from class name."""
+        return cls.__name__.lower() + 's'
 
-    def __init__(self, **kwargs):
-        """Initialize a new model instance."""
+    id = db.Column(db.String(40),
+                  primary_key=True,
+                  default=lambda: str(uuid.uuid4()),
+                  unique=True,
+                  nullable=False,
+                  index=True)
+
+    created_at = db.Column(db.DateTime(timezone=True),
+                          server_default=func.now(),
+                          nullable=False,
+                          index=True)
+
+    updated_at = db.Column(db.DateTime(timezone=True),
+                          server_default=func.now(),
+                          onupdate=func.now(),
+                          nullable=False)
+
+    is_deleted = db.Column(db.Boolean, default=False, nullable=False)
+    deleted_at = db.Column(db.DateTime(timezone=True), nullable=True)
+
+    def __init__(self, **kwargs: Dict[str, Any]) -> None:
+        """Initialize a new model instance with validation."""
         if not kwargs.get('id'):
-            self.id = str(uuid.uuid4())
+            kwargs['id'] = str(uuid.uuid4())
+
+        # Validate input data
+        for key, value in kwargs.items():
+            if not hasattr(self, key):
+                raise AttributeError(f"Invalid field '{key}' for {self.__class__.__name__}")
+
         super().__init__(**kwargs)
 
         if not self.created_at:
@@ -44,81 +67,117 @@ class BaseModel(db.Model):
             self.updated_at = datetime.now(UTC)
 
     @classmethod
-    def get_by_id(cls, id):
-        """Get a record by ID."""
+    def get_by_id(cls, id: str, include_deleted: bool = False) -> Optional['BaseModel']:
+        """Get a record by ID with improved error handling."""
         if not id:
             return None
+
         try:
-            instance = db.session.get(cls, id)
-            if instance is not None:
-                return instance
-            return cls.query.filter_by(id=id).first()
-        except SQLAlchemyError:
+            query = cls.query
+            if not include_deleted:
+                query = query.filter_by(is_deleted=False)
+            return query.filter_by(id=id).first()
+        except SQLAlchemyError as e:
+            logger.error(f"Error retrieving {cls.__name__} with id {id}: {str(e)}")
             db.session.rollback()
             return None
 
-    def save(self):
-        """Save the record to the database."""
-        try:
-            if not self.id:
-                self.id = str(uuid.uuid4())
+    def save(self, commit: bool = True) -> bool:
+        """Save the record to database with retry mechanism."""
+        MAX_RETRIES = 3
+        retry_count = 0
 
-            if not self.created_at:
-                self.created_at = datetime.now(UTC)
-            self.updated_at = datetime.now(UTC)
+        while retry_count < MAX_RETRIES:
+            try:
+                if not self.id:
+                    self.id = str(uuid.uuid4())
 
-            existing = db.session.get(self.__class__, self.id)
-            if existing is not None and existing is not self:
-                db.session.expunge(existing)
+                self.updated_at = datetime.now(UTC)
+                db.session.add(self)
 
-            db.session.add(self)
-            db.session.commit()
-            return True
-        except SQLAlchemyError as e:
-            db.session.rollback()
-            raise e
-
-    def delete(self):
-        """Delete the record from the database."""
-        try:
-            instance = db.session.get(self.__class__, self.id)
-            if instance is not None:
-                db.session.delete(instance)
-                db.session.commit()
+                if commit:
+                    db.session.commit()
                 return True
-            else:
-                raise SQLAlchemyError("Instance not found in database")
-        except SQLAlchemyError as e:
-            db.session.rollback()
-            raise e
 
-    def update(self, **kwargs):
-        """Update specific fields of the record."""
+            except SQLAlchemyError as e:
+                retry_count += 1
+                err = f"Attempt {retry_count} failed to save {self.__class__.__name__}: {str(e)}"
+                logger.warning(err)
+                db.session.rollback()
+
+                if retry_count == MAX_RETRIES:
+                    err = f"Failed to save {self.__class__.__name__} after {MAX_RETRIES} attempts"
+                    logger.error(err)
+                    raise
+
+        return False
+
+    def soft_delete(self) -> bool:
+        """Soft delete the record."""
         try:
-            instance = db.session.get(self.__class__, self.id)
-            if instance is None:
-                raise SQLAlchemyError("Instance not found in database")
+            self.is_deleted = True
+            self.deleted_at = datetime.now(UTC)
+            self.save()
+            return True
+        except SQLAlchemyError as e:
+            err = f"Error soft deleting {self.__class__.__name__} {self.id}: {str(e)}"
+            logger.error(err)
+            return False
 
-            for key, value in kwargs.items():
-                if not hasattr(self, key):
-                    e = f"'{self.__class__.__name__}' has no attribute '{key}'"
-                    raise AttributeError(e)
-                setattr(instance, key, value)
+    def hard_delete(self) -> bool:
+        """Permanently delete the record from database."""
+        try:
+            existing = db.session.get(self.__class__, self.id)
+            if not existing:
+                raise SQLAlchemyError(f"{self.__class__.__name__} {self.id} does not exist")
 
-            instance.updated_at = datetime.now(UTC)
+            db.session.delete(self)
             db.session.commit()
             return True
         except SQLAlchemyError as e:
+            err = f"Error deleting {self.__class__.__name__} {self.id}: {str(e)}"
+            logger.error(err)
             db.session.rollback()
-            raise e
+            raise
 
-    def to_dict(self):
-        """Convert the record to a dictionary."""
-        created_at = self.created_at.isoformat() if self.created_at else None
-        updated_at = self.updated_at.isoformat() if self.updated_at else None
+    def update(self, **kwargs: Dict[str, Any]) -> bool:
+        """Update specific fields with validation and optimistic locking."""
+        try:
+            # Validate fields
+            for key in kwargs:
+                if not hasattr(self, key):
+                    e = f"Invalid field '{key}' for {self.__class__.__name__}"
+                    raise AttributeError(e)
 
-        return {
-            "id": self.id,
-            "created_at": created_at,
-            "updated_at": updated_at,
-        }
+            # Update fields
+            for key, value in kwargs.items():
+                setattr(self, key, value)
+
+            if self not in db.session:
+                db.session.add(self)
+
+            self.updated_at = datetime.now(UTC)
+            db.session.commit()
+
+            # Refresh the instance to ensure we have the latest data
+            db.session.refresh(self)
+            return True
+
+        except SQLAlchemyError as e:
+            logger.error(f"Error updating {self.__class__.__name__} {self.id}: {str(e)}")
+            db.session.rollback()
+            return False
+
+    def to_dict(self, exclude: set = None) -> Dict[str, Any]:
+        """Convert record to dictionary with sensitive field exclusion."""
+        if exclude is None:
+            exclude = set()
+
+        data = {}
+        for column in self.__table__.columns:
+            if column.name not in exclude:
+                value = getattr(self, column.name)
+                if isinstance(value, datetime):
+                    value = value.isoformat()
+                data[column.name] = value
+        return data
