@@ -1,6 +1,9 @@
 # Python
 backend/venv/
 backend/__pycache__/
+backend/tests/__pycache__/
+backend/tests/test_models/__pycache__/
+backend/tests/test_routes/__pycache__/
 backend/*/__pycache__/
 backend/*.pyc
 backend/*.pyo
