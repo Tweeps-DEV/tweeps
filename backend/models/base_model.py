@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Defines a basemodel that all the other models inherit from"""
+"""Base model module providing common functionality for all database models.
+
+This module defines the BaseModel class that serves as the foundation for all
+other models in the application. It provides common CRUD operations, timestamp
+handling, and UUID-based primary keys.
+"""
 import logging
 import uuid
 from app import db
@@ -18,12 +23,17 @@ T = TypeVar('T', bound='BaseModel')
 
 class BaseModel(db.Model):
     """
-    Base model class that includes CRUD operations, timestamp columns,
-    and a UUID primary key.
+    Abstract base model providing common functionality for all models.
+
+    This class implements common operations and fields used across all models
+    including CRUD operations, timestamps, and soft delete functionality.
+
     Attributes:
-        id (UUID): The unique identifier for the model instance.
-        created_at (DateTime): The timestamp when the instance was created.
-        updated_at (DateTime): The timestamp when the instance was updated.
+        id: UUID primary key for the model instance
+        created_at: Timestamp of instance creation
+        updated_at: Timestamp of last instance update
+        is_deleted: Soft delete flag
+        deleted_at: Timestamp of soft deletion
     """
     __abstract__ = True
 
@@ -55,7 +65,14 @@ class BaseModel(db.Model):
     @classmethod
     @contextmanager
     def transaction(cls):
-        """Context manager for database transactions with automatic rollback."""
+        """Provide a transactional scope around a series of operations.
+
+        Yields:
+            None: Yields control to the context block
+
+        Raises:
+            Exception: Re-raises any exception that occurs in the transaction
+        """
         try:
             yield
             db.session.commit()
@@ -68,26 +85,42 @@ class BaseModel(db.Model):
         """Initialize a new model instance with validation."""
         self.validate_init_data(kwargs)
 
-        if not kwargs.get('id'):
-            kwargs['id'] = str(uuid.uuid4())
-
         super().__init__(**kwargs)
 
+        if not self.id:
+            self.id = str(uuid.uuid4())
+
+        now = datetime.now(UTC)
         if not self.created_at:
-            self.created_at = datetime.now(UTC)
+            self.created_at = now
         if not self.updated_at:
-            self.updated_at = datetime.now(UTC)
+            self.updated_at = now
 
     @classmethod
     def validate_init_data(cls, data: Dict[str, Any]) -> None:
-        """Validate initialization data"""
+        """Validate initialization data before instance creation.
+
+        Args:
+            data: Dictionary of field names and values
+
+        Raises:
+            AttributeError: If data contains invalid field names
+        """
         invalid_fields = [key for key in data if not hasattr(cls, key)]
         if invalid_fields:
             raise AttributeError(f"Invalid fields for {cls.__name__}: {', '.join(invalid_fields)}")
 
     @classmethod
     def get_by_id(cls, id: str, include_deleted: bool = False) -> Optional['BaseModel']:
-        """Get a record by ID with improved error handling."""
+        """Retrieve a model instance by its ID.
+
+        Args:
+            id: UUID string of the instance to retrieve
+            include_deleted: Whether to include soft-deleted records
+
+        Returns:
+            Model instance if found, None otherwise
+        """
         if not id:
             return None
 
@@ -103,7 +136,17 @@ class BaseModel(db.Model):
 
     @classmethod
     def bulk_create(cls: Type[T], items: List[Dict[str, Any]]) -> List[T]:
-        """Bulk create records with error handling."""
+        """Create multiple model instances in a single transaction.
+
+        Args:
+            items: List of dictionaries containing instance data
+
+        Returns:
+            List of created model instances
+
+        Raises:
+            SQLAlchemyError: If bulk creation fails
+        """
         instances = []
         try:
             with cls.transaction():
@@ -117,7 +160,20 @@ class BaseModel(db.Model):
             raise
 
     def save(self, commit: bool = True) -> bool:
-        """Save the record to database with retry mechanism."""
+        """Save the current instance to the database.
+
+        Implements retry logic for handling transient database errors.
+
+        Args:
+            commit: Whether to commit the transaction immediately
+
+        Returns:
+            bool: True if save successful, False otherwise
+
+        Raises:
+            IntegrityError: If database constraints are violated
+            SQLAlchemyError: If save operation fails after retries
+        """
         MAX_RETRIES = 3
         retry_count = 0
 
@@ -127,7 +183,8 @@ class BaseModel(db.Model):
                     self.id = str(uuid.uuid4())
 
                 self.updated_at = datetime.now(UTC)
-                db.session.add(self)
+                if self not in db.session:
+                    db.session.add(self)
 
                 if commit:
                     db.session.commit()
