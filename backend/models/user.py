@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Defines a user model"""
 import re
-from backend.extensions import bcrypt, db
+from app import bcrypt, db
 from models.base_model import BaseModel
 from models.order import Order
 
