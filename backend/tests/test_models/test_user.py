@@ -5,6 +5,7 @@ This module contains comprehensive test cases for the User class,
 including authentication, data validation, and relationship handling.
 """
 import unittest
+from datetime import datetime, UTC
 from unittest.mock import Mock, patch
 from models.user import User
 from extensions import bcrypt
@@ -50,25 +51,25 @@ class TestUser(unittest.TestCase):
 
     def test_password_hashing(self):
         """Test password hashing functionality."""
-        test_password = "securepassword123"
+        test_password = "Securepassword123"
         self.user.set_password(test_password)
         self.assertIsNotNone(self.user.password_hash)
         self.assertNotEqual(self.user.password_hash, test_password)
         self.assertTrue(self.user.check_password(test_password))
-        self.assertFalse(self.user.check_password("wrongpassword"))
+        self.assertFalse(self.user.check_password("Wrongpassword"))
 
         another_user = User(**self.valid_user_data)
-        another_user.set_password("differentpassword")
+        another_user.set_password("Differentpassword44")
         self.assertNotEqual(self.user.password_hash,
                             another_user.password_hash)
 
     def test_password_encoding(self):
         """Test password hash encoding and decoding."""
         special_passwords = [
-            "password123!@#",
-            "üserPässword",
-            "паролькириллица",
-            "密码中文"
+            "Password123!@#",
+            "userPässword4",
+            "Nаролькириллица7",
+            "P密码中可口可樂文d69"
         ]
 
         for password in special_passwords:
