@@ -4,13 +4,16 @@ import logging
 import uuid
 from app import db
 from datetime import datetime, timezone, UTC
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.sql import func
 from sqlalchemy.orm import Session
-from typing import Optional, Any, Dict
+from typing import Optional, Any, Dict, List, Type, TypeVar
+from contextlib import contextmanager
 
 logger = logging.getLogger(__name__)
+
+T = TypeVar('T', bound='BaseModel')
 
 
 class BaseModel(db.Model):
@@ -46,18 +49,27 @@ class BaseModel(db.Model):
                           onupdate=func.now(),
                           nullable=False)
 
-    is_deleted = db.Column(db.Boolean, default=False, nullable=False)
+    is_deleted = db.Column(db.Boolean, default=False, nullable=False, index=True)
     deleted_at = db.Column(db.DateTime(timezone=True), nullable=True)
+
+    @classmethod
+    @contextmanager
+    def transaction(cls):
+        """Context manager for database transactions with automatic rollback."""
+        try:
+            yield
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Transaction failed: {str(e)}")
+            raise
 
     def __init__(self, **kwargs: Dict[str, Any]) -> None:
         """Initialize a new model instance with validation."""
+        self.validate_init_data(kwargs)
+
         if not kwargs.get('id'):
             kwargs['id'] = str(uuid.uuid4())
-
-        # Validate input data
-        for key, value in kwargs.items():
-            if not hasattr(self, key):
-                raise AttributeError(f"Invalid field '{key}' for {self.__class__.__name__}")
 
         super().__init__(**kwargs)
 
@@ -65,6 +77,13 @@ class BaseModel(db.Model):
             self.created_at = datetime.now(UTC)
         if not self.updated_at:
             self.updated_at = datetime.now(UTC)
+
+    @classmethod
+    def validate_init_data(cls, data: Dict[str, Any]) -> None:
+        """Validate initialization data"""
+        invalid_fields = [key for key in data if not hasattr(cls, key)]
+        if invalid_fields:
+            raise AttributeError(f"Invalid fields for {cls.__name__}: {', '.join(invalid_fields)}")
 
     @classmethod
     def get_by_id(cls, id: str, include_deleted: bool = False) -> Optional['BaseModel']:
@@ -82,6 +101,21 @@ class BaseModel(db.Model):
             db.session.rollback()
             return None
 
+    @classmethod
+    def bulk_create(cls: Type[T], items: List[Dict[str, Any]]) -> List[T]:
+        """Bulk create records with error handling."""
+        instances = []
+        try:
+            with cls.transaction():
+                for item in items:
+                    instance = cls(**item)
+                    db.session.add(instance)
+                    instances.append(instance)
+            return instances
+        except SQLAlchemyError as e:
+            logger.error(f"Bulk create failed for {cls.__name__}: {str(e)}")
+            raise
+
     def save(self, commit: bool = True) -> bool:
         """Save the record to database with retry mechanism."""
         MAX_RETRIES = 3
@@ -97,27 +131,36 @@ class BaseModel(db.Model):
 
                 if commit:
                     db.session.commit()
+                    db.session.refresh(self)
                 return True
+
+            except IntegrityError as e:
+                db.session.rollback()
+                logger.error(f"Integrity error saving {self.__class__.__name__}: {str(e)}")
+                raise
 
             except SQLAlchemyError as e:
                 retry_count += 1
-                err = f"Attempt {retry_count} failed to save {self.__class__.__name__}: {str(e)}"
-                logger.warning(err)
                 db.session.rollback()
 
                 if retry_count == MAX_RETRIES:
-                    err = f"Failed to save {self.__class__.__name__} after {MAX_RETRIES} attempts"
+                    err = f"Failed to save {self.__class__.__name__} after {MAX_RETRIES} attempts: {str(e)}"
                     logger.error(err)
                     raise
 
         return False
 
+    def validate(self) -> None:
+        """Validate model data before save. Override in subclasses."""
+        pass
+
     def soft_delete(self) -> bool:
         """Soft delete the record."""
         try:
-            self.is_deleted = True
-            self.deleted_at = datetime.now(UTC)
-            self.save()
+            with self.transaction():
+                self.is_deleted = True
+                self.deleted_at = datetime.now(UTC)
+                self.save()
             return True
         except SQLAlchemyError as e:
             err = f"Error soft deleting {self.__class__.__name__} {self.id}: {str(e)}"
@@ -127,40 +170,33 @@ class BaseModel(db.Model):
     def hard_delete(self) -> bool:
         """Permanently delete the record from database."""
         try:
-            existing = db.session.get(self.__class__, self.id)
-            if not existing:
-                raise SQLAlchemyError(f"{self.__class__.__name__} {self.id} does not exist")
-
-            db.session.delete(self)
-            db.session.commit()
+            with self.transaction():
+                db.session.delete(self)
             return True
         except SQLAlchemyError as e:
             err = f"Error deleting {self.__class__.__name__} {self.id}: {str(e)}"
             logger.error(err)
-            db.session.rollback()
             raise
 
     def update(self, **kwargs: Dict[str, Any]) -> bool:
         """Update specific fields with validation and optimistic locking."""
         try:
-            # Validate fields
-            for key in kwargs:
-                if not hasattr(self, key):
-                    e = f"Invalid field '{key}' for {self.__class__.__name__}"
-                    raise AttributeError(e)
+            with self.transaction():
+                # Validate fields
+                invalid_fields = [key for key in kwargs if not hasattr(self, key)]
+                if invalid_fields:
+                    raise AttributeError(f"Invalid fields: {', '.join(invalid_fields)}")
 
-            # Update fields
-            for key, value in kwargs.items():
-                setattr(self, key, value)
+                # Update fields
+                for key, value in kwargs.items():
+                    setattr(self, key, value)
 
-            if self not in db.session:
-                db.session.add(self)
+                self.validate()
+                self.updated_at = datetime.now(UTC)
 
-            self.updated_at = datetime.now(UTC)
-            db.session.commit()
+                if self not in db.session:
+                    db.session.add(self)
 
-            # Refresh the instance to ensure we have the latest data
-            db.session.refresh(self)
             return True
 
         except SQLAlchemyError as e:
@@ -173,11 +209,15 @@ class BaseModel(db.Model):
         if exclude is None:
             exclude = set()
 
+        exclude.update({'password_hash', 'password'})
+
         data = {}
         for column in self.__table__.columns:
             if column.name not in exclude:
                 value = getattr(self, column.name)
                 if isinstance(value, datetime):
                     value = value.isoformat()
+                elif isinstance(value, uuid.UUID):
+                    value = str(value)
                 data[column.name] = value
         return data
