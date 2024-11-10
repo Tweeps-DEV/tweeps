@@ -1,7 +1,7 @@
-# backend/tests/test_order.py
+#!/usr/bin/env python3
 import unittest
-from backend.app import create_app
-from backend.models.order import Order
+from app import create_app
+from models.order import Order
 
 class TestOrder(unittest.TestCase):
 
