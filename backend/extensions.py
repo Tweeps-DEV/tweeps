@@ -11,7 +11,7 @@ bcrypt = Bcrypt()
 
 REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379')
 
-pool = redis.connection.BlockingConnectionPool.from_url(REDIS_URI)
+pool = redis.connection.BlockingConnectionPool.from_url(REDIS_URL)
 limiter = Limiter(
     key_func=get_remote_address,
     storage_uri=REDIS_URL,
