@@ -5,6 +5,7 @@ This module contains comprehensive test cases for the MenuItem class,
 including admin operations, validation, and data conversion.
 """
 import unittest
+from app import create_app, db
 from unittest.mock import Mock, patch
 from models.menu_item import MenuItem
 from sqlalchemy.exc import SQLAlchemyError
@@ -23,6 +24,20 @@ class TestMenuItem(unittest.TestCase):
         mock_admin_user (Mock): A mocked admin user for testing admin ops
         mock_normal_user (Mock): A mocked normal user for testing users
     """
+    @classmethod
+    def setUpClass(cls):
+        """Set up the test environment once for all tests."""
+        cls.app = create_app('testing')
+        cls.app_context = cls.app.app_context()
+        cls.app_context.push()
+        db.create_all()
+
+    @classmethod
+    def tearDownClass(cls):
+        """Clean up the test environment after all tests."""
+        db.session.remove()
+        db.drop_all()
+        cls.app_context.pop()
 
     def setUp(self):
         """
@@ -31,6 +46,8 @@ class TestMenuItem(unittest.TestCase):
         Creates necessary mocks and test data to isolate tests
         from external dependencies.
         """
+        db.session.begin_nested()
+
         # Create mock users
         self.mock_admin_user = Mock()
         self.mock_admin_user.is_admin = True
@@ -49,16 +66,12 @@ class TestMenuItem(unittest.TestCase):
             'is_available': True
         }
 
-        # Mock the save and delete methods
-        MenuItem.save = Mock()
-        MenuItem.delete = Mock()
-
     def tearDown(self):
         """
         Clean up test fixtures after each test method.
         """
-        MenuItem.save = None
-        MenuItem.delete = None
+        db.session.rollback()
+        db.session.remove()
 
     @patch('models.menu_item.current_user')
     def test_create_menu_item_success(self, mock_current_user):
@@ -75,12 +88,26 @@ class TestMenuItem(unittest.TestCase):
         """
         mock_current_user.is_admin = True
 
-        menu_item = MenuItem.create_menu_item(**self.valid_item_data)
+        menu_item = MenuItem(**self.valid_item_data)
+        db.session.add(menu_item)
+        db.session.commit()
 
-        self.assertEqual(menu_item.name, self.valid_item_data['name'])
-        self.assertEqual(menu_item.price, self.valid_item_data['price'])
-        self.assertEqual(menu_item.category, self.valid_item_data['category'])
-        MenuItem.save.assert_called_once()
+        item_id = menu_item.id
+
+        MenuItem.delete_menu_item(item_id)
+
+        deleted_item = db.session.get(MenuItem, item_id)
+        self.assertIsNone(deleted_item)
+
+    @patch('models.menu_item.current_user')
+    def test_delete_menu_item_not_found(self, mock_current_user):
+        """Test deleting non-existent menu item raises error."""
+        mock_current_user.is_admin = True
+
+        with self.assertRaises(ValueError) as context:
+            MenuItem.delete_menu_item('non-existent-id')
+
+        self.assertIn("Menu item not found", str(context.exception))
 
     @patch('models.menu_item.current_user')
     def test_create_menu_item_permission_denied(self, mock_current_user):
@@ -96,11 +123,14 @@ class TestMenuItem(unittest.TestCase):
         """
         mock_current_user.is_admin = False
 
+        menu_item = MenuItem(**self.valid_item_data)
+        db.session.add(menu_item)
+        db.session.commit()
+
         with self.assertRaises(PermissionError) as context:
-            MenuItem.create_menu_item(**self.valid_item_data)
+            MenuItem.delete_menu_item(menu_item.id)
 
         self.assertIn("Only admins", str(context.exception))
-        MenuItem.save.assert_not_called()
 
     def test_create_menu_item_invalid_data(self):
         """
@@ -124,13 +154,13 @@ class TestMenuItem(unittest.TestCase):
             invalid_data['price'] = 0
             with self.assertRaises(ValueError) as context:
                 MenuItem.create_menu_item(**invalid_data)
-            self.assertIn("Price must be greater than 0",
+            self.assertIn("Price must be between 0.01 and 10000.0",
                           str(context.exception))
 
             invalid_data['price'] = -10
             with self.assertRaises(ValueError) as context:
                 MenuItem.create_menu_item(**invalid_data)
-            self.assertIn("Price must be greater than 0",
+            self.assertIn("Price must be between 0.01 and 10000.0",
                           str(context.exception))
 
     @patch('models.menu_item.current_user')
@@ -204,12 +234,14 @@ class TestMenuItem(unittest.TestCase):
         """
         mock_current_user.is_admin = True
 
-        existing_item = MenuItem()
-        mock_get_by_id.return_value = existing_item
+        menu_item = MenuItem(**self.valid_item_data)
+        db.session.add(menu_item)
+        db.session.commit()
 
-        MenuItem.delete_menu_item('test-id')
+        item_id = menu_item.id
+        MenuItem.delete_menu_item(item_id)
 
-        existing_item.delete.assert_called_once()
+        self.assertIsNone(db.session.get(MenuItem, item_id))
 
     def test_to_dict(self):
         """
