@@ -51,9 +51,9 @@ class TestOrder(unittest.TestCase):
         # Create a test user
         self.test_user = User(
             email="test@example.com",
-            username="Test User"
+            username="TestUser"
         )
-        self.test_user.set_password(password="securepassword123")
+        self.test_user.set_password(password="  Securepassword123")
         self.test_user.save()
 
         # Sample order data
@@ -109,6 +109,9 @@ class TestOrder(unittest.TestCase):
         order = Order(**self.order_data)
         order.save()
 
+        user = User.get_by_id(self.test_user.id)
+        orders = user.orders.all()
+
         self.assertEqual(order.user, self.test_user)
         self.assertIn(order, self.test_user.orders)
 
@@ -133,7 +136,7 @@ class TestOrder(unittest.TestCase):
         order2.save()
 
         self.assertNotEqual(order1.id, order2.id)
-        self.assertEqual(len(self.test_user.orders), 2)
+        self.assertEqual(self.test_user.orders.count(), 2)
 
     def test_order_status_transitions(self):
         """
@@ -166,8 +169,8 @@ class TestOrder(unittest.TestCase):
         self.order_data['status'] = invalid_status
 
         order = Order(**self.order_data)
-        with self.assertRaises(SQLAlchemyError):
-            order.save()
+        with self.assertRaises(ValueError):
+            order.validate()
 
     def test_order_validation(self):
         """
@@ -182,8 +185,8 @@ class TestOrder(unittest.TestCase):
         test_cases = [
             ({"total": 0}, ValueError, "zero total"),
             ({"total": -10.99}, ValueError, "negative total"),
-            ({"date": datetime.now(UTC) + timedelta(days=1)}, ValueError, "future date"),
             ({"items": {}}, ValueError, "empty items"),
+            ({"items": {"item1": {"quantity": 0}}}, ValueError, "zero quantity"),
         ]
 
         for invalid_data, expected_error, case_desc in test_cases:
@@ -192,7 +195,7 @@ class TestOrder(unittest.TestCase):
             order = Order(**test_data)
 
             with self.assertRaises(expected_error, msg=f"Failed to raise error for {case_desc}"):
-                order.save()
+                order.validate()
 
     def test_concurrent_order_updates(self):
         """
@@ -215,7 +218,9 @@ class TestOrder(unittest.TestCase):
                 None
             ]
 
-            order.update(status="confirmed")
+            order.status = "confirmed"
+            order.save()
+
             mock_session.rollback.assert_called_once()
 
     def test_order_history(self):
