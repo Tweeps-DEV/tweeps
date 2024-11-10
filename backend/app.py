@@ -36,6 +36,9 @@ def create_app(config_name='default'):
 
     db.init_app(app)
     migrate.init_app(app, db)
+
+    from models import User, MenuItem, Cart, Order
+
     bcrypt.init_app(app)
     redis_client = Redis(host='localhost', port=6379, db=0)
     limiter.init_app(app)
