@@ -30,8 +30,7 @@ class BaseModel(db.Model):
                            nullable=False)
     updated_at = db.Column(db.DateTime(timezone=True),
                            server_default=func.now(),
-                           onupdate=func.now(),
-                           nullable=False)
+                           onupdate=func.now())
 
     def __init__(self, **kwargs):
         """Initialize a new model instance."""
