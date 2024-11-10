@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """Defines MenuItem model with admin operations"""
-from backend.extensions import db
-from models.base_model import BaseModel
-from sqlalchemy.dialects.postgresql import ARRAY
-from sqlalchemy.exc import SQLAlchemyError
+from app import db
 from flask_login import current_user
+from models.base_model import BaseModel
+from sqlalchemy.exc import SQLAlchemyError
 
 
 class MenuItem(BaseModel):
@@ -32,7 +31,7 @@ class MenuItem(BaseModel):
     price = db.Column(db.Float, nullable=False)
     image_url = db.Column(db.String(255))
     is_available = db.Column(db.Boolean, default=True)
-    toppings = db.Column(ARRAY(db.String), default=[])
+    toppings = db.Column(db.JSON, default=[])
     category = db.Column(db.String(50), nullable=False)
 
     @classmethod
