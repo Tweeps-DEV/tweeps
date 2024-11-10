@@ -1,7 +1,7 @@
 #!usr/bin/env python3
 """Defines an Order model"""
 import uuid
-from backend.extensions import db
+from app import db
 from models.base_model import BaseModel
 from sqlalchemy.orm import relationship
 
@@ -29,7 +29,7 @@ class Order(BaseModel):
     user_id = db.Column(db.String(40),
                         db.ForeignKey('users.id'),
                         nullable=False)
-    items = db.Column(db.PickleType, nullable=False)
+    items = db.Column(db.JSON, default={})
     date = db.Column(db.DateTime, nullable=False)
     total = db.Column(db.Float, nullable=False)
     status = db.Column(db.String(20), nullable=False)
