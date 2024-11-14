@@ -9,6 +9,7 @@ backend/*.pyc
 backend/*.pyo
 backend/.env
 backend/migrations/
+backend/app.log*
 
 # Node
 frontend/node_modules/

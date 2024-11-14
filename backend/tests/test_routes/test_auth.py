@@ -91,11 +91,6 @@ class TestAuthRoutes(unittest.TestCase):
             content_type='application/json'
         )
 
-        print("\nSignup Response:", signup_response.status_code)
-        print("Signup Response Data:", signup_response.get_data(as_text=True))
-
-        db.session.remove()
-
         login_data = {
             'email': self.valid_user_data['email'],
             'password': self.valid_user_data['password']
@@ -105,9 +100,6 @@ class TestAuthRoutes(unittest.TestCase):
             data=json.dumps(login_data),
             content_type='application/json'
         )
-
-        print("\nLogin Response:", response.status_code)
-        print("Login Response Data:", response.get_data(as_text=True))
 
         self.assertEqual(response.status_code, 200)
         self.assertIn('token', json.loads(response.data))
@@ -123,10 +115,6 @@ class TestAuthRoutes(unittest.TestCase):
             data=json.dumps(login_data),
             content_type='application/json'
         )
-
-        print("\nInvalid Login Response:", response.status_code)
-        print("Invalid Login Response Data:", response.get_data(as_text=True))
-
 
         self.assertEqual(response.status_code, 401)
         self.assertEqual(

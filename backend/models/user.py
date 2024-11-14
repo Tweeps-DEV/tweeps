@@ -2,7 +2,8 @@
 """Defines a user model"""
 import logging
 import re
-from app import bcrypt, db
+from app import db
+from extensions import bcrypt
 from datetime import datetime,  UTC
 from models.base_model import BaseModel
 from models.order import Order

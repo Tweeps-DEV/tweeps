@@ -67,7 +67,6 @@ class TestingConfig(Config):
     """
     TESTING = True
     SQLALCHEMY_DATABASE_URI = os.getenv('TEST_DATABASE_URI')
-    RATELIMIT_STORAGE_URL = 'redis://localhost:6379/1'
     RATELIMIT_ENABLED = False
 
 
