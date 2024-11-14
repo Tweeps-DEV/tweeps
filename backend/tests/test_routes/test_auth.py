@@ -26,7 +26,7 @@ class TestAuthRoutes(unittest.TestCase):
         self.valid_user_data = {
             'username': 'testuser',
             'email': 'test@example.com',
-            'password': 'password123'
+            'password': 'Password123'
         }
         self.invalid_user_data = {
             'username': 'te',  # Too short
@@ -64,11 +64,13 @@ class TestAuthRoutes(unittest.TestCase):
 
     def test_signup_duplicate_email(self):
         """Test signup with existing email"""
-        self.client.post(
+        response = self.client.post(
             '/api/auth/signup',
             data=json.dumps(self.valid_user_data),
             content_type='application/json'
         )
+
+        self.assertEqual(response.status_code, 201)
 
         response = self.client.post(
             '/api/auth/signup',
@@ -83,11 +85,16 @@ class TestAuthRoutes(unittest.TestCase):
 
     def test_login_success(self):
         """Test successful login"""
-        self.client.post(
+        signup_response = self.client.post(
             '/api/auth/signup',
             data=json.dumps(self.valid_user_data),
             content_type='application/json'
         )
+
+        print("\nSignup Response:", signup_response.status_code)
+        print("Signup Response Data:", signup_response.get_data(as_text=True))
+
+        db.session.remove()
 
         login_data = {
             'email': self.valid_user_data['email'],
@@ -98,6 +105,10 @@ class TestAuthRoutes(unittest.TestCase):
             data=json.dumps(login_data),
             content_type='application/json'
         )
+
+        print("\nLogin Response:", response.status_code)
+        print("Login Response Data:", response.get_data(as_text=True))
+
         self.assertEqual(response.status_code, 200)
         self.assertIn('token', json.loads(response.data))
 
@@ -112,6 +123,11 @@ class TestAuthRoutes(unittest.TestCase):
             data=json.dumps(login_data),
             content_type='application/json'
         )
+
+        print("\nInvalid Login Response:", response.status_code)
+        print("Invalid Login Response Data:", response.get_data(as_text=True))
+
+
         self.assertEqual(response.status_code, 401)
         self.assertEqual(
             json.loads(response.data)['message'],

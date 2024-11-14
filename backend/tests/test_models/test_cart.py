@@ -139,13 +139,21 @@ class TestCart(unittest.TestCase):
             - Toppings are properly stored
             - Item is added with correct attributes
         """
+        self.menu_item.toppings = [
+            {"name": "Cheese", "price": 1.0},
+            {"name": "Pepperoni", "price": 2.0}
+        ]
         mock_get_by_id.return_value = self.menu_item
-        toppings = ["cheese", "tomato", "bacon"]
 
+        toppings = ["Cheese", "Pepperoni"]
         self.cart.add_item("item-123", quantity=1, selected_toppings=toppings)
 
-        self.assertEqual(self.cart.items["item-123"]["toppings"], toppings)
+        self.assertIn("item-123", self.cart.items)
         self.assertEqual(self.cart.items["item-123"]["quantity"], 1)
+        self.assertEqual(self.cart.items["item-123"]["toppings"], toppings)
+
+        expected_price = 13.0  # Base price (10.0) + Cheese (1.0) + Pepperoni (2.0)
+        self.assertEqual(self.cart.total_price, expected_price)
 
     @patch('models.cart.MenuItem.get_by_id')
     def test_add_item_invalid_cases(self, mock_get_by_id):
@@ -165,11 +173,11 @@ class TestCart(unittest.TestCase):
 
         with self.assertRaises(ValueError) as context:
             self.cart.add_item("item-123", quantity=0)
-        self.assertIn("greater than 0", str(context.exception))
+        self.assertIn("Quantity must be between 1 and 99", str(context.exception))
 
         with self.assertRaises(ValueError) as context:
             self.cart.add_item("item-123", quantity=-1)
-        self.assertIn("greater than 0", str(context.exception))
+        self.assertIn("Quantity must be between 1 and 99", str(context.exception))
 
         self.menu_item.is_available = False
         with self.assertRaises(ValueError) as context:
@@ -202,10 +210,9 @@ class TestCart(unittest.TestCase):
         self.cart.remove_item("item-123", quantity=2)
         self.assertEqual(self.cart.items["item-123"]["quantity"], 1)
 
-        self.cart.remove_item("non-existent")
-
-        self.cart.remove_item("item-123", quantity=5)
-        self.assertNotIn("item-123", self.cart.items)
+        with self.assertRaises(ValueError) as context:
+            self.cart.remove_item("non-existent")
+        self.assertIn("Item not in cart", str(context.exception))
 
     def test_clear_cart(self):
         """

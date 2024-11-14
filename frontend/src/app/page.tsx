@@ -167,7 +167,7 @@ const Home: NextPage = () => {
         </section>
 
         {/* Footer */}
-        <footer className="min-h-[60vh] bg-[#FFD6E0] text-[#2D080A] py-8 sm:py-12 lg:py-16 snap-start">
+        <footer className="min-h-[40vh] bg-[#FFD6E0] text-[#2D080A] py-8 sm:py-12 lg:py-16 snap-start">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
               {/* Brand Section */}

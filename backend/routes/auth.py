@@ -34,13 +34,13 @@ class UserSchema(Schema):
     username = fields.Str(required=True,
                           validate=validate.Length(min=3, max=30))
     email = fields.Email(required=True)
-    password = fields.Str(required=True, validate=lambda p: len(p) >= 8)
+    password = fields.Str(required=True)
 
 
 class LoginSchema(Schema):
     """Schema for login validation"""
     email = fields.Email(required=True)
-    password = fields.Str(required=True, validate=lambda p: len(p) >= 8)
+    password = fields.Str(required=True)
 
 
 # Authentication decorator
@@ -119,7 +119,10 @@ def signup():
             info = f"Received signup request with data: {data}"
             current_app.logger.info(info)
 
-        UserSchema().load(data)
+        errors = UserSchema().validate(data)
+        if errors:
+            return jsonify(errors), 400
+
 
         if User.query.filter_by(email=data['email']).first():
             return jsonify({'message': 'Email already exists'}), 400
@@ -129,6 +132,7 @@ def signup():
 
         new_user = User(username=data['username'], email=data['email'])
         new_user.set_password(data['password'])
+        new_user.validate()
         db.session.add(new_user)
         db.session.commit()
         return jsonify({
@@ -139,6 +143,7 @@ def signup():
                 'email': new_user.email
             }
         }), 201
+
     except ValidationError as err:
         return jsonify(err.messages), 400
     except Exception as e:
@@ -173,7 +178,9 @@ def login():
         if not data:
             return jsonify({'message': 'No data provided'}), 400
 
-        LoginSchema().load(data)
+        errors = LoginSchema().validate(data)
+        if errors:
+            return jsonify(errors), 400
 
         user = User.query.filter_by(email=data['email']).first()
         if not user or not user.check_password(data['password']):
@@ -183,13 +190,22 @@ def login():
 
         token = jwt.encode(
             {
-                'user_id': user.id,
+                'id': user.id,
                 'exp': expiration_time
             },
             current_app.config['SECRET_KEY'],
             algorithm="HS256"
         )
-        return jsonify({'token': token})
+
+        return jsonify({
+            'token': token,
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email
+            }
+        }), 200
+
     except ValidationError as err:
         return jsonify(err.messages), 400
     except Exception as e:
