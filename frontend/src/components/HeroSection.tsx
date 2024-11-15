@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Button } from './ui/Button';
 import { useEffect, useState } from 'react';
 import _ from 'lodash';
+import Link from 'next/link';
 
 const WaveDivider = () => (
   <div className="absolute bottom-0 left-0 w-full overflow-hidden rotate-180">
@@ -119,9 +120,11 @@ const HeroSection: React.FC = () => {
               Welcome to Tweeps, where every dish tells a story and every meal becomes a memory.
               Get your meals delivered to your doorstep at your own convenience.
             </p>
-            <Button variant="primary" size="lg" className="tracking-tight">
-              Order now
-            </Button>
+            <Link href="/login" passHref>
+              <Button variant="primary" size="lg" className="tracking-tight">
+                Order now
+              </Button>
+            </Link>
           </motion.div>
 
           <div className="relative hidden lg:block">

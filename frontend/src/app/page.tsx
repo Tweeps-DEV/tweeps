@@ -14,6 +14,7 @@ import FeatureSection from '../components/FeatureSection';
 import TestimonialCarousel from '../components/TestimonialCarousel';
 import { Menu, Clock, MapPin, Star, Mail, Phone, X } from 'lucide-react';
 import AboutSection from '../components/About';
+import Link from 'next/link';
 
 const Home: NextPage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
