@@ -107,7 +107,7 @@ const HeroSection: React.FC = () => {
       <div className="container mx-auto px-4 lg:px-8 relative">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 lg:gap-32 items-center">
           <motion.div
-            className="space-y-8 relative z-10"
+            className="relative z-10"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -116,7 +116,7 @@ const HeroSection: React.FC = () => {
               Have You Been
               <span className="text-[#f2ae2a]"> Served Yet?</span>
             </h1>
-            <p className="text-2xl text-gray-600 max-w-lg tracking-tight">
+            <p className="text-2xl text-gray-600 max-w-lg tracking-tight mt-8 mb-8">
               Welcome to Tweeps, where every dish tells a story and every meal becomes a memory.
               Get your meals delivered to your doorstep at your own convenience.
             </p>

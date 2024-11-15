@@ -61,9 +61,9 @@ const FeaturesSection = () => {
   ];
 
   return (
-    <div className="relative min-h-screen bg-white">
+    <div className="relative min-h-screen bg-white flex items-center">
       <WaveDivider />
-      <section className="py-8 sm:py-12 md:py-16 lg:py-24">
+      <section className="w-full py-8 sm:py-12 md:py-16 lg:py-24">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="text-center mb-8 sm:mb-12 md:mb-16 lg:mb-20">
             <h2 className="text-3xl sm:text-4xl md:text-4xl lg:text-5xl font-bold mb-8 sm:mb-12 md:mb-16 text-gray-900">

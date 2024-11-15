@@ -2,31 +2,22 @@ import { useState } from 'react';
 import { Menu, Info, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './ui/Button';
+import Link from 'next/link';
 
 const NAVIGATION_ITEMS = [
   { href: '#menu', text: 'Menu', icon: Menu },
   { href: '#about', text: 'About', icon: Info }
 ] as const;
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-}
-
 interface NavigationProps {
-  onLogin: () => Promise<void>;
   isAuthenticated: boolean;
-  user?: User;
   isMenuOpen: boolean;
   setIsMenuOpen: (isOpen: boolean) => void;
   onNavigate: (section: keyof typeof sectionRefs) => void;
 }
 
 export const Navigation: React.FC<NavigationProps> = ({
-  onLogin,
   isAuthenticated,
-  user,
   isMenuOpen,
   setIsMenuOpen,
   onNavigate
@@ -52,9 +43,11 @@ export const Navigation: React.FC<NavigationProps> = ({
                   Logout
                 </Button>
               ) : (
-                <Button variant="primary" size="sm" onClick={onLogin}>
-                  Login
-                </Button>
+                <Link href="/login" passHref>
+                  <Button variant="primary" size="sm">
+                    Login
+                  </Button>
+                </Link>
               )}
             </div>
 
@@ -113,8 +106,8 @@ export const Navigation: React.FC<NavigationProps> = ({
                 }}
               >
                 {[
-                  { href: "#menu", text: "Menu" },
-                  { href: "#about", text: "About" }
+                  { href: "#menu", text: "Menu", icon: Menu },
+                  { href: "#about", text: "About", icon: Info }
                 ].map((item) => (
                   <motion.a
                     key={item.href}
@@ -140,9 +133,11 @@ export const Navigation: React.FC<NavigationProps> = ({
                       Logout
                     </Button>
                   ) : (
-                    <Button variant="primary" size="lg" onClick={onLogin} className="w-full tracking-tight">
-                      Login
-                    </Button>
+                    <Link href="/login" passHref>
+                      <Button variant="primary" size="lg" className="w-full tracking-tight">
+                        Login
+                      </Button>
+                    </Link>
                   )}
                 </motion.div>
               </motion.div>

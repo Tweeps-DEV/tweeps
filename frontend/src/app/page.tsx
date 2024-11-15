@@ -126,7 +126,6 @@ const Home: NextPage = () => {
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       <Navigation
-        onLogin={handleLogin}
         isAuthenticated={isAuthenticated}
         user={user}
         isMenuOpen={isMenuOpen}
