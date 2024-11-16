@@ -9,6 +9,7 @@ import { AlertCircle, Eye, EyeOff, ArrowRight, Loader2, X, Home } from 'lucide-r
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
+import { login } from '@/lib/auth';
 
 interface FormData {
   email: string;
@@ -29,7 +30,6 @@ const LoginPage: NextPage = () => {
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [rememberMe, setRememberMe] = useState<boolean>(false);
 
-  // Initialize email from localStorage if available
   useEffect(() => {
     const savedEmail = localStorage.getItem('rememberedEmail');
     if (savedEmail) {
@@ -42,7 +42,6 @@ const LoginPage: NextPage = () => {
     const errors: ValidationErrors = {};
     let isValid = true;
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email) {
       errors.email = 'Email is required';
@@ -52,7 +51,6 @@ const LoginPage: NextPage = () => {
       isValid = false;
     }
 
-    // Password validation
     if (!formData.password) {
       errors.password = 'Password is required';
       isValid = false;
@@ -76,19 +74,10 @@ const LoginPage: NextPage = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+      await login({
+        email: formData.email.toLowerCase(),
+        password: formData.password,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Invalid email or password');
-      }
 
       // Handle remember me
       if (rememberMe) {
@@ -97,14 +86,12 @@ const LoginPage: NextPage = () => {
         localStorage.removeItem('rememberedEmail');
       }
 
-      // Show success toast
       toast({
         title: "Login successful",
         description: "Redirecting to dashboard...",
         duration: 2000,
       });
 
-      // Redirect after a small delay to show the success message
       setTimeout(() => {
         router.push('/dashboard');
       }, 500);
@@ -132,7 +119,6 @@ const LoginPage: NextPage = () => {
     }
   };
 
-  // Handle keyboard events
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !loading) {
       handleSubmit(e);
@@ -141,7 +127,6 @@ const LoginPage: NextPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-[#FFD6E0]/20 flex flex-col justify-center relative">
-      {/* Back to home button */}
       <Link 
         href="/"
         className="absolute top-4 left-4 p-2 text-gray-600 hover:text-gray-900 transition-colors"
