@@ -2,6 +2,7 @@
 """Defines the backend entry point"""
 import os
 from config import config
+from cache import cache
 from extensions import limiter
 from flask import Flask
 from flask_bcrypt import Bcrypt
@@ -42,7 +43,11 @@ def create_app(config_name='default'):
 
     from models import User, MenuItem, Cart, Order
 
-    redis_client = Redis(host='localhost', port=6379, db=0)
+    cache._redis = Redis(
+        host=app.config.get('REDIS_HOST', 'localhost'),
+        port=app.config.get('REDIS_PORT', 6379),
+        db=app.config.get('REDIS_DB', 0)
+    )
     limiter.init_app(app)
     CORS(app,
          resources={r"/*": {"origins": app.config['ALLOWED_ORIGINS']}})
