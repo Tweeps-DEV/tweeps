@@ -1,8 +1,6 @@
 'use client';
-
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getAccessToken, removeTokens } from '@/lib/auth';
 
 interface User {
   id: string;
@@ -16,6 +14,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   setUser: (user: User | null) => void;
   logout: () => Promise<void>;
+  refreshAuth: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,31 +22,88 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
+
+  const verifyAuth = async (): Promise<{ user: User } | null> => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        return null;
+      }
+
+      const response = await fetch('/api/auth/verify', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Verification failed');
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Auth verification error:', error);
+      return null;
+    }
+  };
+
+  const refreshAuth = async () => {
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        throw new Error('No token found');
+      }
+
+      const result = await verifyAuth();
+      if (result?.user) {
+        setUser(result.user);
+        setIsAuthenticated(true);
+      } else {
+        throw new Error('Invalid token');
+      }
+    } catch (error) {
+      console.error('Auth refresh error:', error);
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      setUser(null);
+      setIsAuthenticated(false);
+      router.push('/login');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     const initializeAuth = async () => {
+      setIsLoading(true);
       try {
-        const token = getAccessToken();
-        if (token) {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          
-          if (response.ok) {
-            const userData = await response.json();
-            setUser(userData);
-          } else {
-            removeTokens();
-            setUser(null);
-          }
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+          setIsAuthenticated(false);
+          setUser(null);
+          return;
+        }
+
+        const result = await verifyAuth();
+        if (result?.user) {
+          setUser(result.user);
+          setIsAuthenticated(true);
+        } else {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          setUser(null);
+          setIsAuthenticated(false);
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
-        removeTokens();
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
         setUser(null);
+        setIsAuthenticated(false);
       } finally {
         setIsLoading(false);
       }
@@ -56,19 +112,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     initializeAuth();
   }, []);
 
+  useEffect(() => {
+    setIsAuthenticated(!!user);
+  }, [user]);
+
   const logout = async () => {
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${getAccessToken()}`,
-        },
-      });
+      const token = localStorage.getItem('accessToken');
+      if (token) {
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+      }
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      removeTokens();
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
       setUser(null);
+      setIsAuthenticated(false);
       router.push('/login');
     }
   };
@@ -79,8 +144,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         setUser,
         isLoading,
-        isAuthenticated: !!user,
+        isAuthenticated,
         logout,
+        refreshAuth,
       }}
     >
       {children}

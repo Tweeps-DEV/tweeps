@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-const publicPaths = ['/', '/login', '/signup', '/forgot-password']
+const publicPaths = ['/', '/login', '/signup', '/dashboard']
 
 export function middleware(request: NextRequest) {
   const token = request.cookies.get('access_token')?.value
