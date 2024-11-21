@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
 import { Loader2 } from 'lucide-react';
@@ -9,29 +9,17 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading, tokens } = useAuth();
-  const [authStatus, setAuthStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading');
-
-  useEffect(() => {
-    if (isLoading) {
-      setAuthStatus('loading');
-    } else if (isAuthenticated) {
-      setAuthStatus('authenticated');
-      console.log('ProtectedRoute: Authenticated', tokens);
-    } else {
-      setAuthStatus('unauthenticated');
-      console.log('ProtectedRoute: Unauthenticated');
-    }
-  }, [isLoading, isAuthenticated, tokens]);
+  const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push('/login');
+      // Instead of pushing to /login, consider redirecting to preserve browser history
+      router.replace('/login');
     }
   }, [isLoading, isAuthenticated, router]);
 
-  if (authStatus === 'loading') {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-[#f2ae2a]" />
@@ -39,9 +27,8 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  if (authStatus === 'unauthenticated') {
-    console.log('Redirecting to /login');
-    return null; // Or a loading indicator if you prefer
+  if (!isAuthenticated) {
+    return null;
   }
 
   return <>{children}</>;
