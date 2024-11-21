@@ -37,7 +37,7 @@ export const getAccessToken = () => {
 export const apiClient = async (endpoint: string, options: RequestInit = {}) => {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
   const accessToken = getAccessToken();
-  
+
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
     ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
@@ -47,26 +47,22 @@ export const apiClient = async (endpoint: string, options: RequestInit = {}) => 
   const response = await fetch(`${baseUrl}${endpoint}`, {
     ...options,
     headers,
-    credentials: 'include', // Add this to handle cookies properly
+    credentials: 'include',
   });
 
-  if (response.status === 401) {
-    removeTokens();
-    window.location.href = '/login';
-    throw new Error('Session expired. Please login again.');
-  }
 
-  const data = await response.json();
-  
   if (!response.ok) {
+    removeTokens();
+    const data = await response.json();
+
     if (response.status === 400 && data.errors) {
-      // Handle validation errors
       throw new Error(Object.values(data.errors).join(', '));
     }
+    
     throw new Error(data.message || 'An error occurred');
   }
 
-  return data;
+  return await response.json();
 };
 
 export const login = async (credentials: LoginCredentials): Promise<AuthResponse> => {
