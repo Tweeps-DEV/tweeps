@@ -5,7 +5,7 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import DashboardGreeting from '@/components/dashboard/DashboardGreeting';
 import { Search, Menu, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
-import { toast } from '@/components/ui/toast';
+import { Toast } from '@/components/ui/toast';
 import { useAuth } from '@/contexts/auth-context';
 
 // Types

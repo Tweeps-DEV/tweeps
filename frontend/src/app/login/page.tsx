@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, Eye, EyeOff, ArrowRight, Loader2, X, Home } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from '@/components/ui/use-toast';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Authbutton';
 import { login } from '@/lib/auth';
 
 interface FormData {
