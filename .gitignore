@@ -11,6 +11,9 @@ backend/.env
 backend/migrations/
 backend/app.log*
 
+# Agent
+.aider*
+
 # Node
 frontend/node_modules/
 frontend/.env
