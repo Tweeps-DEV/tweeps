@@ -285,6 +285,7 @@ def login() -> Tuple[Dict[str, Any], int]:
                 'id': str(user.id),
                 'name': user.username,
                 'email': user.email,
+                'phone_contact': user.phone_contact
             }
         }), 200
 
@@ -354,26 +355,3 @@ def refresh_token() -> Tuple[Dict[str, Any], int]:
     except Exception as e:
         logger.error(f"Token refresh error: {str(e)}")
         return jsonify({'message': 'Token refresh failed'}), 500
-
-@bp.route('/api/auth/verify', methods=['GET'])
-@token_required
-def verify_auth(current_user) -> Tuple[Dict[str, Any], int]:
-    """Verify user authentication and return user details
-
-    This endpoint uses the @token_required decorator to verify the access token
-    and returns the current user's details if authentication is successful.
-
-    Returns:
-        tuple: Contains user details dictionary and HTTP status code
-    """
-    try:
-        return jsonify({
-            'user': {
-                'id': str(current_user.id),
-                'name': current_user.username,
-                'email': current_user.email
-            }
-        }), 200
-    except Exception as e:
-        logger.error(f"Auth verification error: {str(e)}")
-        return jsonify({'message': 'Verification failed'}), 500

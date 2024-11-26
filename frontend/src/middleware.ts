@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-const publicPaths = ['/', '/login', '/signup', '/dashboard']
+const publicPaths = ['/', '/login', '/signup', '/forgot-password']
 
 export function middleware(request: NextRequest) {
   const token = request.cookies.get('access_token')?.value
@@ -33,6 +33,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * - public folder
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|public|.*\\.svg|.*\\.gif|.*\\.png).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|public|.*\\.svg).*)',
   ],
 }

@@ -27,7 +27,6 @@ export const storeTokens = (tokens: AuthTokens) => {
 export const removeTokens = () => {
   localStorage.removeItem('access_token');
   localStorage.removeItem('refresh_token');
-  sessionStorage.clear();
 };
 
 export const getAccessToken = () => {
@@ -70,7 +69,6 @@ export const apiClient = async (endpoint: string, options: RequestInit = {}) => 
 };
 
 export const login = async (credentials: LoginCredentials): Promise<AuthResponse> => {
-  removeTokens();
   const data = await apiClient('/api/auth/login', {
     method: 'POST',
     body: JSON.stringify(credentials),

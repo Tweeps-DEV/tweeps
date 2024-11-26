@@ -10,7 +10,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { login } from '@/lib/auth';
-import { useAuth } from '@/contexts/auth-context';
 
 interface FormData {
   email: string;
@@ -30,7 +29,6 @@ const LoginPage: NextPage = () => {
   const [error, setError] = useState<string>('');
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [rememberMe, setRememberMe] = useState<boolean>(false);
-  const { setUser } = useAuth();
 
   useEffect(() => {
     const savedEmail = localStorage.getItem('rememberedEmail');
@@ -76,7 +74,7 @@ const LoginPage: NextPage = () => {
     setLoading(true);
 
     try {
-      const data = await login({
+      await login({
         email: formData.email.toLowerCase(),
         password: formData.password,
       });
@@ -93,8 +91,6 @@ const LoginPage: NextPage = () => {
         description: "Redirecting to dashboard...",
         duration: 2000,
       });
-
-      setUser(data.user);
 
       setTimeout(() => {
         router.push('/dashboard');
