@@ -14,8 +14,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      // Instead of pushing to /login, consider redirecting to preserve browser history
-      router.replace('/login');
+      router.push('/login');
     }
   }, [isLoading, isAuthenticated, router]);
 

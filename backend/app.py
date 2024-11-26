@@ -52,12 +52,9 @@ def create_app(config_name='default'):
     CORS(app,
          resources={r"/*": {"origins": app.config['ALLOWED_ORIGINS']}})
 
-    from routes import auth, main
-    app.register_blueprint(auth.bp, url_prefix='/auth') # Add url_prefix
-    app.register_blueprint(main.bp)
-
-    from test_auth import test_auth_route
-    test_auth_route(app)
+    # Register Blueprints
+    from routes import auth
+    app.register_blueprint(auth.bp)
 
     return app
 
