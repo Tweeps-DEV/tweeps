@@ -1,8 +1,7 @@
 'use client';
-import { useAuth } from '@/contexts/auth-context';
 
 export default function DashboardGreeting() {
-  const { user } = useAuth();
+  const { user } = useAuth(); // Get username on login response
   
   const getGreeting = () => {
     const hour = new Date().getHours();
