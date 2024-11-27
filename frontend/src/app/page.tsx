@@ -167,79 +167,70 @@ const Home: NextPage = () => {
         </section>
 
         {/* Footer */}
-        <footer className="min-h-[40vh] bg-[#FFD6E0] text-[#2D080A] py-8 sm:py-12 lg:py-16 snap-start">
+        <footer className="bg-[#f2ae2a] text-gray-300 py-12">
           <div className="container mx-auto px-4 lg:px-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
-              {/* Brand Section */}
-              <div className="space-y-4 text-center sm:text-left">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+              {/* Company Information */}
+              <div className="space-y-4">
                 <img
                   src="/tweeps-logo.svg"
                   alt="Tweeps Logo"
-                  className="h-16 sm:h-20 w-auto mx-auto sm:mx-0"
+                  className="h-44 w-auto"
                 />
-                <p className="text-[#2D080A] text-sm sm:text-base max-w-xs mx-auto sm:mx-0">
-                  Experience the art of fine dining in an elegant atmosphere.
+                <p className="text-sm text-gray-800 max-w-xs">
+                  Serving delicious, quality fast food since 2020. Your satisfaction is our priority.
                 </p>
-                {/* Social Media Icons */}
-                <div className="flex space-x-4 pt-4 justify-center sm:justify-start">
+                <div className="flex space-x-4">
                   <a
                     href="https://instagram.com/tweeps"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:text-[#f2ae2a] transition-colors p-2 hover:bg-white/10 rounded-full"
-                    aria-label="Instagram"
+                    className="text-gray-800 hover:text-white transition-colors"
                   >
-                    <Instagram size={20} className="sm:w-6 sm:h-6" />
+                    <Instagram size={20} />
                   </a>
                   <a
                     href="https://twitter.com/tweeps"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:text-[#f2ae2a] transition-colors p-2 hover:bg-white/10 rounded-full"
-                    aria-label="Twitter"
+                    className="text-gray-800 hover:text-white transition-colors"
                   >
-                    <Twitter size={20} className="sm:w-6 sm:h-6" />
+                    <Twitter size={20} />
                   </a>
                 </div>
               </div>
 
-              {/* Contact Section */}
-              <div className="space-y-4 text-center sm:text-left">
-                <h3 className="text-lg sm:text-xl font-bold text-[#f2ae2a]">Contact</h3>
+              {/* Contact Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-[#895B1E]">Contact Us</h3>
                 <div className="space-y-3">
-                  <a
-                    href="tel:+254705704788"
-                    className="flex items-center gap-2 hover:text-[#f2ae2a] transition-colors justify-center sm:justify-start group"
-                  >
-                    <Phone size={16} className="group-hover:scale-110 transition-transform" />
-                    <span className="text-sm sm:text-base">+254705704788</span>
+                  <a href="tel:+254705704788" className="flex items-center space-x-2 text-gray-800 hover:text-white transition-colors">
+                    <Phone size={16} />
+                    <span>+254 705 704 788</span>
                   </a>
-                  <a
-                    href="mailto:tweepsfastfood@gmail.com"
-                    className="flex items-center gap-2 hover:text-[#f2ae2a] transition-colors justify-center sm:justify-start group"
-                  >
-                    <Mail size={16} className="group-hover:scale-110 transition-transform" />
-                    <span className="text-sm sm:text-base">tweepsfastfood@gmail.com</span>
+                  <a href="mailto:tweepsfastfood@gmail.com" className="flex items-center space-x-2 text-gray-800 hover:text-white transition-colors">
+                    <Mail size={16} />
+                    <span>tweepsfastfood@gmail.com</span>
                   </a>
                   <a
                     href="https://maps.app.goo.gl/FFR5MHwjt8j5Sows9"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 hover:text-[#f2ae2a] transition-colors justify-center sm:justify-start group"
+                    className="flex items-center space-x-2 text-gray-800 hover:text-white transition-colors"
                   >
-                    <MapPin size={16} className="group-hover:scale-110 transition-transform" />
-                    <span className="text-sm sm:text-base">Rm 12 Pressy Building</span>
+                    <MapPin size={16} />
+                    <span>Rm 12 Pressy Building</span>
                   </a>
                 </div>
               </div>
 
-              {/* Hours Section */}
-              <div className="space-y-4 text-center lg:text-left">
-                <h3 className="text-lg sm:text-xl font-bold text-[#f2ae2a]">Hours</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 justify-center lg:justify-start">
-                    <Clock size={16} />
-                    <div className="text-sm sm:text-base">
+              {/* Operating Hours */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-[#895B1E]">Opening Hours</h3>
+                <div className="space-y-2 text-gray-800">
+                  <div className="flex items-start space-x-2">
+                    <Clock size={16} className="mt-1 flex-shrink-0" />
+                    <div>
                       <p>Monday - Friday: 11:00 AM - 11:00 PM</p>
                       <p>Saturday - Sunday: 10:00 AM - 12:00 AM</p>
                     </div>
@@ -248,8 +239,8 @@ const Home: NextPage = () => {
               </div>
             </div>
 
-            <div className="mt-8 pt-8 border-t border-[#2D080A]/10 text-center text-sm">
-              <p>© {new Date().getFullYear()} Tweeps™. All rights reserved.</p>
+            <div className="mt-12 pt-8 border-t border-gray-800">
+              <p className="text-sm text-gray-900">© {new Date().getFullYear()} Tweeps™. All rights reserved.</p>
             </div>
           </div>
         </footer>
