@@ -279,7 +279,7 @@ def login() -> Tuple[Dict[str, Any], int]:
         record_login_attempt(email, True)
         logger.info(f"Successful login: {email}")
 
-        return jsonify({
+        response = jsonify({
             'tokens': tokens,
             'user': {
                 'id': str(user.id),
@@ -287,7 +287,9 @@ def login() -> Tuple[Dict[str, Any], int]:
                 'email': user.email,
                 'phone_contact': user.phone_contact
             }
-        }), 200
+        })
+        response.set_cookie('session', tokens['access_token'], httponly=True, secure=True, samesite='Strict')
+        return response, 200
 
     except ValidationError as err:
         return jsonify({'errors': err.messages}), 400
@@ -346,7 +348,9 @@ def refresh_token() -> Tuple[Dict[str, Any], int]:
             timeout=REFRESH_TOKEN_EXPIRY * 86400
         )
 
-        return jsonify({'tokens': new_tokens}), 200
+        response = jsonify({'tokens': new_tokens})
+        response.set_cookie('session', new_tokens['access_token'], httponly=True, secure=True, samesite='Strict')
+        return response, 200
 
     except jwt.ExpiredSignatureError:
         return jsonify({'message': 'Refresh token has expired'}), 401
