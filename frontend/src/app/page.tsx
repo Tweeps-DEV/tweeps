@@ -1,6 +1,7 @@
 'use client';
 import type { NextPage } from 'next';
 import { useState, useRef, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import _ from 'lodash';
 import { Instagram, Twitter } from 'lucide-react';
