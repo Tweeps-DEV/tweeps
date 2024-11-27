@@ -1,7 +1,8 @@
 'use client';
 
+import { getUserName } from '@/lib/auth';
+
 export default function DashboardGreeting() {
-  const { user } = useAuth(); // Get username on login response
   
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -13,7 +14,7 @@ export default function DashboardGreeting() {
   return (
     <div className="space-y-2">
       <h1 className="text-2xl font-bold text-gray-900">
-        {getGreeting()}, {user?.name || 'Guest'} 👋
+        {getGreeting()}, {getUserName() || 'Guest'} 👋
       </h1>
       <p className="text-gray-500 text-sm">
         What would you like to order today?

@@ -12,6 +12,11 @@ interface AuthResponse {
   };
 }
 
+
+export const getUserName = () => {
+  return localStorage.getItem('user_name');
+};
+
 interface LoginCredentials {
   email: string;
   password: string;
@@ -75,6 +80,7 @@ export const login = async (credentials: LoginCredentials): Promise<AuthResponse
   });
   
   storeTokens(data.tokens);
+  localStorage.setItem('user_name', data.user.name);
   return data;
 };
 
