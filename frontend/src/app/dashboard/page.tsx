@@ -1,12 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import DashboardGreeting from '@/components/dashboard/DashboardGreeting';
 import { Search, Menu, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
 import { Toast } from '@/components/ui/toast';
-import { useAuth } from '@/contexts/auth-context';
 
 // Types
 interface MenuItem {
@@ -199,9 +197,7 @@ const DashboardContent = () => {
 
 const DashboardPage = () => {
   return (
-    <ProtectedRoute>
-      <DashboardContent />
-    </ProtectedRoute>
+    <DashboardContent />
   );
 };
 
