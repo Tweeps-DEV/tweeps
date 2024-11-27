@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Menu, Info, X } from 'lucide-react';
+import { signOut, useSession } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './ui/Button';
 import Link from 'next/link';
@@ -17,7 +18,8 @@ interface NavigationProps {
 }
 
 export const Navigation: React.FC<NavigationProps> = ({
-  isAuthenticated,
+  session,
+  status,
   isMenuOpen,
   setIsMenuOpen,
   onNavigate
@@ -38,8 +40,8 @@ export const Navigation: React.FC<NavigationProps> = ({
               <a href="#about" className="text-gray-600 hover:text-[#f2ae2a] transition-colors">
                 About
               </a>
-              {isAuthenticated ? (
-                <Button variant="secondary" size="sm">
+              {status === "authenticated" ? (
+                <Button variant="secondary" size="sm" onClick={() => signOut({ callbackUrl: '/login' })}>
                   Logout
                 </Button>
               ) : (
@@ -128,8 +130,8 @@ export const Navigation: React.FC<NavigationProps> = ({
                     visible: { opacity: 1, x: 0 }
                   }}
                 >
-                  {isAuthenticated ? (
-                    <Button variant="secondary" size="lg" className="w-full tracking-tight">
+                  {status === "authenticated" ? (
+                    <Button variant="secondary" size="lg" className="w-full tracking-tight" onClick={() => signOut({ callbackUrl: '/login' })}>
                       Logout
                     </Button>
                   ) : (

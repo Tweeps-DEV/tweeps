@@ -17,8 +17,9 @@ import AboutSection from '../components/About';
 import Link from 'next/link';
 
 const Home: NextPage = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<User | undefined>();
+  const {  session, status } = useSession();
+  const isAuthenticated = status === "authenticated";
+  const user = session?.user;
   const [showContent, setShowContent] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -40,22 +41,6 @@ const Home: NextPage = () => {
     });
   };
 
-  const handleLogin = async () => {
-    try {
-      setLoading(true);
-      // Login logic here
-      setIsAuthenticated(true);
-      setUser({
-        id: '1',
-        name: 'John Doe',
-        email: 'john@example.com',
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Login failed'));
-    } finally {
-      setLoading(false);
-    }
-  };
 
   function useIntersectionObserver(ref: RefObject<HTMLElement>, options: IntersectionObserverInit = {}) {
   const [isIntersecting, setIntersecting] = useState(false);
