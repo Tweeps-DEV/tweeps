@@ -18,12 +18,12 @@ interface NavigationProps {
 }
 
 export const Navigation: React.FC<NavigationProps> = ({
-  session,
-  status,
   isMenuOpen,
   setIsMenuOpen,
   onNavigate
 }) => {
+  const { session, status } = useSession();
+
   return (
     <>
       <div className="sticky top-0 z-50 bg-white">
@@ -45,8 +45,8 @@ export const Navigation: React.FC<NavigationProps> = ({
                   Logout
                 </Button>
               ) : (
-                <Link href="/login" passHref>
-                  <Button variant="primary" size="sm">
+                <Link href="/login" passHref legacyBehavior>
+                  <Button variant="primary" size="sm" as="a">
                     Login
                   </Button>
                 </Link>
