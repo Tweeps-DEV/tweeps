@@ -12,65 +12,75 @@ interface AuthResponse {
   };
 }
 
-
-export const getUserName = () => {
-  return localStorage.getItem('user_name');
-};
-
 interface LoginCredentials {
   email: string;
   password: string;
 }
 
-export const storeTokens = (tokens: AuthTokens) => {
-  localStorage.setItem('access_token', tokens.access_token);
-  if (tokens.refresh_token) {
-    localStorage.setItem('refresh_token', tokens.refresh_token);
-  }
+// Store user data in a more structured way
+interface UserData {
+  id: string;
+  name: string;
+  email: string;
+}
+
+// Helper to handle user data
+export const storeUserData = (user: UserData) => {
+  localStorage.setItem('user_data', JSON.stringify(user));
 };
 
-export const removeTokens = () => {
-  localStorage.removeItem('access_token');
-  localStorage.removeItem('refresh_token');
+export const getUserData = (): UserData | null => {
+  const data = localStorage.getItem('user_data');
+  return data ? JSON.parse(data) : null;
 };
 
-export const getAccessToken = () => {
-  return localStorage.getItem('access_token');
+export const getUserName = () => {
+  const userData = getUserData();
+  return userData?.name || 'Guest';
+};
+
+// Remove localStorage token storage since we're using HTTP-only cookies
+export const clearUserData = () => {
+  localStorage.removeItem('user_data');
 };
 
 export const apiClient = async (endpoint: string, options: RequestInit = {}) => {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-  const accessToken = getAccessToken();
   
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
-    ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
     ...options.headers,
   };
 
-  const response = await fetch(`${baseUrl}${endpoint}`, {
-    ...options,
-    headers,
-    credentials: 'include', // Add this to handle cookies properly
-  });
+  try {
+    const response = await fetch(`${baseUrl}${endpoint}`, {
+      ...options,
+      headers,
+      credentials: 'include', // This ensures cookies are sent with requests
+    });
 
-  if (response.status === 401) {
-    removeTokens();
-    window.location.href = '/login';
-    throw new Error('Session expired. Please login again.');
-  }
-
-  const data = await response.json();
-  
-  if (!response.ok) {
-    if (response.status === 400 && data.errors) {
-      // Handle validation errors
-      throw new Error(Object.values(data.errors).join(', '));
+    if (response.status === 401) {
+      clearUserData();
+      window.location.href = '/login';
+      throw new Error('Session expired. Please login again.');
     }
-    throw new Error(data.message || 'An error occurred');
-  }
 
-  return data;
+    const data = await response.json();
+    
+    if (!response.ok) {
+      if (response.status === 400 && data.errors) {
+        throw new Error(Object.values(data.errors).join(', '));
+      }
+      throw new Error(data.message || 'An error occurred');
+    }
+
+    return data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('An unexpected error occurred');
+  }
 };
 
 export const login = async (credentials: LoginCredentials): Promise<AuthResponse> => {
@@ -79,8 +89,8 @@ export const login = async (credentials: LoginCredentials): Promise<AuthResponse
     body: JSON.stringify(credentials),
   });
   
-  storeTokens(data.tokens);
-  localStorage.setItem('user_name', data.user.name);
+  // Store only user data, not tokens (tokens are in HTTP-only cookies)
+  storeUserData(data.user);
   return data;
 };
 
@@ -95,9 +105,7 @@ export const signup = async (userData: {
     body: JSON.stringify(userData),
   });
   
-  if (data.tokens) {
-    storeTokens(data.tokens);
-  }
+  storeUserData(data.user);
   return data;
 };
 
@@ -109,6 +117,7 @@ export const logout = async () => {
   } catch (error) {
     console.error('Logout API error:', error);
   } finally {
-    removeTokens();
+    clearUserData();
+    window.location.href = '/login';
   }
 };
