@@ -94,7 +94,7 @@ export const Navigation: React.FC<NavigationProps> = ({
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className="fixed top-0 right-0 w-full h-screen bg-white z-40 overflow-y-auto"
           >
-            <div className="pt-24 px-8">
+            <div className="pt-32 px-8">
               <motion.div
                 className="space-y-8"
                 initial="hidden"
