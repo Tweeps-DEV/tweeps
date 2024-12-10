@@ -30,7 +30,9 @@ export const Navigation: React.FC<NavigationProps> = ({
         <nav className="py-6 px-4 lg:px-8">
           <div className="container mx-auto flex justify-between items-center">
             <div className="flex-shrink-0">
-              <img src="/tweeps-logo.svg" alt="Tweeps Logo" className="h-12 w-auto" />
+              <Link href="/" legacyBehavior>
+                <img src="/tweeps-logo.svg" alt="Tweeps Logo" className="h-12 w-auto cursor-pointer" />
+              </Link>
             </div>
 
             <div className="hidden lg:flex items-center space-x-12">
