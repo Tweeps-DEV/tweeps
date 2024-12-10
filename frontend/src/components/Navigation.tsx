@@ -31,7 +31,7 @@ export const Navigation: React.FC<NavigationProps> = ({
           <div className="container mx-auto flex justify-between items-center">
             <div className="flex-shrink-0">
               <Link href="/" legacyBehavior>
-                <img src="/tweeps-logo.svg" alt="Tweeps Logo" className="h-20 w-auto cursor-pointer" />
+                <img src="/tweeps-logo.svg" alt="Tweeps Logo" className="h-16 w-auto cursor-pointer" />
               </Link>
             </div>
 
