@@ -72,7 +72,7 @@ const TestimonialCarousel = () => {
       <AnimatePresence initial={false} custom={direction}>
         <motion.div
           key={currentIndex}
-          className={`absolute inset-0 flex items-center justify-center ${testimonials[currentIndex].bgColor} cursor-grab active:cursor-grabbing`}
+          className={`absolute h-screen inset-0 flex items-center justify-center ${testimonials[currentIndex].bgColor} cursor-grab active:cursor-grabbing`}
           custom={direction}
           variants={slideVariants}
           initial="enter"

@@ -26,10 +26,10 @@ interface Category {
 }
 
 const CATEGORY_ICONS: Record<string, string> = {
-  'Sushi': '🍣',
-  'Ramen': '🍜',
-  'Curry': '🍛',
-  'Drinks': '🥤',
+  'Meals Dealz': '🍣',
+  'Snack it!': '🍜',
+  'Beverages': '🍛',
+  'Tantalizers': '🥤',
   'Desserts': '🍰',
   'default': '🍴'
 };
@@ -165,7 +165,7 @@ const DashboardContent = () => {
                 <p className="text-sm text-gray-500 line-clamp-2">{item.description}</p>
                 <div className="flex items-center justify-between">
                   <span className="text-[#f2ae2a] font-semibold text-lg">
-                    ${item.price.toFixed(2)}
+                    Ksh {item.price.toFixed(2)}
                   </span>
                   <span className="text-sm text-gray-500">
                     {item.preparation_time} min

@@ -124,6 +124,10 @@ const Home: NextPage = () => {
           <HeroSection />
         </div>
 
+        <section ref={sectionRefs.testimonials} className="snap-start h-screen overflow-hidden w-full py-24">
+          <TestimonialCarousel />
+        </section>
+
         <div ref={sectionRefs.features} className="snap-start overflow-hidden h-screen w-full">
           <FeatureSection />
         </div>
@@ -144,16 +148,12 @@ const Home: NextPage = () => {
           </div>
         </section>
 
-        <section ref={sectionRefs.testimonials} className="snap-start h-screen overflow-hidden w-full py-24">
-          <TestimonialCarousel />
-        </section>
-
         <section ref={sectionRefs.about} className="snap-start" id="about">
           <AboutSection />
         </section>
 
         {/* Footer */}
-        <footer className="bg-[#f2ae2a] text-gray-300 py-12">
+        <footer className="bg-[#f2ae2a]/40 text-gray-300 py-12">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
               {/* Company Information */}

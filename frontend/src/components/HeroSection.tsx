@@ -52,7 +52,7 @@ const HeroSection: React.FC = () => {
   
 
   return (
-    <div className="relative h-screen flex items-center overflow-visible">
+    <div className="relative h-screen flex items-center overflow-hidden">
       <motion.div
         className="absolute pointer-events-none"
         animate={{
@@ -128,38 +128,10 @@ const HeroSection: React.FC = () => {
           </motion.div>
 
           <div className="relative hidden lg:block">
-            <motion.div
-              className="absolute pointer-events-none"
-              style={{
-                width: '100%',
-                height: '100%',
-                position: 'absolute',
-                top: '-20%',
-                right: '-20%',
-                zIndex: 0,
-              }}
-              animate={{
-                rotate: [0, 360],
-                scale: [0.9, 1.1, 0.9],
-              }}
-              transition={{
-                duration: 20,
-                repeat: Infinity,
-                repeatType: "reverse",
-                ease: "linear",
-              }}
-            >
-              <img 
-                src="/blob.svg" 
-                alt="" 
-                className="w-full h-full opacity-10"
-              />
-            </motion.div>
-
             <motion.img
-              src="/heroImage.png"
+              src="/heroimage.webp"
               alt="Decorative right SVG"
-              className="w-[500px] h-auto relative z-10"
+              className="w-[1100px] h-auto relative z-10"
               initial={{ opacity: 0, x: 50 }}
               animate={{ 
                 opacity: 3, 
@@ -180,9 +152,6 @@ const HeroSection: React.FC = () => {
           </div>
         </div>
       </div>
-      
-      {/* Added Wave Divider */}
-      <WaveDivider />
     </div>
   );
 };

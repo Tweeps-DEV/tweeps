@@ -4,7 +4,7 @@ const AboutSection = () => {
   return (
     <div className="relative w-full min-h-screen bg-white overflow-hidden">
       <div 
-        className="absolute inset-0 pointer-events-none bg-[url('/about-bg.svg')] bg-cover bg-center bg-no-repeat opacity-10"
+        className="absolute inset-0 pointer-events-none bg-[url('/about-bg.svg')] bg-cover bg-center bg-no-repeat opacity-5"
         aria-hidden="true"
       />
 
