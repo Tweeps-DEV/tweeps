@@ -19,9 +19,9 @@ export const MenuCard = ({ title, description, price, image }: MenuItemProps) =>
         className="w-full h-full object-cover"
       />
     </div>
-    <div className="p-4 sm:p-6">
+    <div className="p-8">
       <div className="flex justify-between items-center mb-2">
-        <h3 className="text-lg sm:text-xl font-semibold">{title}</h3>
+        <h3 className="text-xl font-semibold">{title}</h3>
         <span className="text-[#f2ae2a] font-bold">{price}</span>
       </div>
       <p className="text-sm sm:text-base text-gray-600">{description}</p>
