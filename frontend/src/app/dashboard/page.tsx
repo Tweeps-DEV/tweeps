@@ -6,7 +6,6 @@ import { Search, Menu, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
 import { Toast } from '@/components/ui/toast';
 
-// Types
 interface MenuItem {
   id: string;
   name: string;

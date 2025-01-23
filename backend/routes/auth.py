@@ -359,3 +359,9 @@ def refresh_token() -> Tuple[Dict[str, Any], int]:
     except Exception as e:
         logger.error(f"Token refresh error: {str(e)}")
         return jsonify({'message': 'Token refresh failed'}), 500
+
+@bp.route('/api/auth/verify', methods=['GET'])
+@token_required
+def verify_token(current_user):
+    """Endpoint to verify if a token is valid"""
+    return jsonify({'valid': True}), 200

@@ -29,8 +29,17 @@ const LoginPage: NextPage = () => {
   const [error, setError] = useState<string>('');
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [rememberMe, setRememberMe] = useState<boolean>(false);
+  const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
 
   useEffect(() => {
+    const errorMessage = searchParams.get('error');
+    if (errorMessage) {
+      setError(decodeURIComponent(errorMessage));
+
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('error');
+      router.replace(newUrl.pathname + newUrl.search, undefined, { shallow: true });
+    }
     const savedEmail = localStorage.getItem('rememberedEmail');
     if (savedEmail) {
       setFormData(prev => ({ ...prev, email: savedEmail }));
