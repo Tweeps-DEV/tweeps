@@ -155,7 +155,7 @@ const DashboardContent = () => {
               className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow"
             >
               <img
-                src={item.image_url || '/api/placeholder/320/240'}
+                src={item.image_url}
                 alt={item.name}
                 className="w-full h-48 object-cover rounded-lg mb-4"
               />
