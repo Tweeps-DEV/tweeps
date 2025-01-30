@@ -61,11 +61,9 @@ const CartPage = () => {
 
   const calculateTotal = () => {
     const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const tax = subtotal * 0.1; // 10% tax
-    const deliveryFee = 1.50;
+    const deliveryFee = 30.0;
     return {
       subtotal,
-      tax,
       deliveryFee,
       total: subtotal + tax + deliveryFee
     };
@@ -152,10 +150,6 @@ const CartPage = () => {
                 <div className="flex justify-between">
                   <span className="text-gray-600">Subtotal</span>
                   <span>$ {totals.subtotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Tax</span>
-                  <span>$ {totals.tax.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Delivery Fee</span>
