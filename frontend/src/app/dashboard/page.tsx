@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import DashboardGreeting from '@/components/dashboard/DashboardGreeting';
 import { Search, Menu, ShoppingCart } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { Toast } from '@/components/ui/toast';
+import { toast } from '@/components/ui/use-toast';
 
 interface MenuItem {
   id: string;
@@ -154,7 +155,7 @@ const DashboardContent = () => {
               key={item.id}
               className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow"
             >
-              <img
+              <Image
                 src={item.image_url}
                 alt={item.name}
                 className="w-full h-48 object-cover rounded-lg mb-4"

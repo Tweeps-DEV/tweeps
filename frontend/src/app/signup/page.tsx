@@ -9,7 +9,8 @@ import { AlertCircle, Eye, EyeOff, ArrowRight, Loader2, X, Home } from 'lucide-r
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/Authbutton';
-import { signup } from '@/lib/auth'
+import { signup } from '@/lib/auth';
+import Image from 'next/image';
 
 interface FormData {
   username: string;
@@ -168,7 +169,7 @@ const SignupPage: NextPage = () => {
         className="w-full px-4 py-8 sm:px-6 lg:px-8"
       >
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <img 
+          <Image 
             src="/tweeps-logo.svg" 
             alt="Tweeps Logo" 
             className="mx-auto h-20 w-auto sm:h-20" 

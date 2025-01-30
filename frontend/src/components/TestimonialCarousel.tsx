@@ -27,7 +27,6 @@ const TestimonialCarousel = () => {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
-  const [[page, direction2], setPage] = useState([0, 0]);
 
   const slideVariants = {
     enter: (direction: number) => ({
@@ -125,7 +124,7 @@ const TestimonialCarousel = () => {
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
               >
-                "{testimonials[currentIndex].quote}"
+                &ldquo;{testimonials[currentIndex].quote}&rdquo;
               </motion.p>
 
               <motion.div

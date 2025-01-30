@@ -48,6 +48,7 @@ export async function middleware(request: NextRequest) {
           return NextResponse.redirect(new URL('/dashboard', request.url))
         }
       } catch (error) {
+        console.log(error)
         return clearSessionAndRedirect(request)
       }
     }
@@ -90,6 +91,7 @@ export async function middleware(request: NextRequest) {
       
       return NextResponse.next()
     } catch (error) {
+      console.log(error)
       return clearSessionAndRedirect(request, pathname, 'Authentication failed. Please login again.')
     }
   }

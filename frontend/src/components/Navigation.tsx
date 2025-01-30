@@ -1,28 +1,21 @@
-import { useState } from 'react';
 import { Menu, Info, X } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './ui/Button';
 import Link from 'next/link';
-
-const NAVIGATION_ITEMS = [
-  { href: '#menu', text: 'Menu', icon: Menu },
-  { href: '#about', text: 'About', icon: Info }
-] as const;
+import Image from 'next/image';
 
 interface NavigationProps {
   isAuthenticated: boolean;
   isMenuOpen: boolean;
   setIsMenuOpen: (isOpen: boolean) => void;
-  onNavigate: (section: keyof typeof sectionRefs) => void;
 }
 
 export const Navigation: React.FC<NavigationProps> = ({
   isMenuOpen,
   setIsMenuOpen,
-  onNavigate
 }) => {
-  const { session, status } = useSession();
+  const { status } = useSession();
 
   return (
     <>
@@ -31,7 +24,7 @@ export const Navigation: React.FC<NavigationProps> = ({
           <div className="container mx-auto flex justify-between items-center">
             <div className="flex-shrink-0">
               <Link href="/" legacyBehavior>
-                <img src="/tweeps-logo.svg" alt="Tweeps Logo" className="h-16 w-auto cursor-pointer" />
+                <Image src="/tweeps-logo.svg" alt="Tweeps Logo" className="h-16 w-auto cursor-pointer" />
               </Link>
             </div>
 

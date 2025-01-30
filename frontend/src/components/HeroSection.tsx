@@ -4,28 +4,6 @@ import { useEffect, useState } from 'react';
 import _ from 'lodash';
 import Link from 'next/link';
 
-const WaveDivider = () => (
-  <div className="absolute bottom-0 left-0 w-full overflow-hidden rotate-180">
-    <svg
-      className="w-full h-auto"
-      viewBox="0 0 1440 320"
-      preserveAspectRatio="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        fill="#f2ae2a"
-        fillOpacity="0.2"
-        d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,218.7C672,235,768,245,864,234.7C960,224,1056,192,1152,176C1248,160,1344,160,1392,160L1440,160L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"
-      ></path>
-      <path
-        fill="#f2ae2a"
-        fillOpacity="0.15"
-        d="M0,96L48,112C96,128,192,160,288,165.3C384,171,480,149,576,149.3C672,149,768,171,864,165.3C960,160,1056,128,1152,117.3C1248,107,1344,117,1392,122.7L1440,128L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"
-      ></path>
-    </svg>
-  </div>
-);
-
 const HeroSection: React.FC = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   
@@ -55,11 +33,7 @@ const HeroSection: React.FC = () => {
     <div className="relative h-screen flex items-center overflow-hidden">
       <motion.div
         className="absolute pointer-events-none"
-        animate={{
-          x: mousePosition.x * 0.3,
-          y: mousePosition.y * 0.3,
-          scale: [1, 1.1, 1],
-        }}
+        animate={{ BLOB_ANIMATION }}
         transition={{
           x: { type: "spring", stiffness: 50, damping: 25 },
           y: { type: "spring", stiffness: 50, damping: 25 },

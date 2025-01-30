@@ -1,28 +1,25 @@
 'use client';
 import type { NextPage } from 'next';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useSession } from 'next-auth/react';
-import { motion, AnimatePresence } from 'framer-motion';
-import _ from 'lodash';
 import { Instagram, Twitter } from 'lucide-react';
 import { Navigation } from '../components/Navigation';
-import { Button } from '../components/ui/Button';
 import { AnimatedSection } from '../components/ui/AnimatedSection';
 import LottiePlayer from '../components/LottiePlayer';
 import { MenuCard } from '../components/MenuCard';
+import { Phone, Mail, MapPin, Clock } from 'lucide-react';
 import HeroSection from '../components/HeroSection';
 import FeatureSection from '../components/FeatureSection';
 import TestimonialCarousel from '../components/TestimonialCarousel';
-import { Menu, Clock, MapPin, Star, Mail, Phone, X } from 'lucide-react';
 import AboutSection from '../components/About';
-import Link from 'next/link';
+import Image from 'next/image';
 
 const Home: NextPage = () => {
-  const {  session, status } = useSession();
+  const {  session } = useSession();
   const user = session?.user;
   const [showContent, setShowContent] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   const sectionRefs = {
@@ -41,26 +38,6 @@ const Home: NextPage = () => {
     });
   };
 
-
-  function useIntersectionObserver(ref: RefObject<HTMLElement>, options: IntersectionObserverInit = {}) {
-  const [isIntersecting, setIntersecting] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => {
-      setIntersecting(entry.isIntersecting);
-    }, options);
-
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
-
-    return () => {
-      observer.disconnect();
-     };
-    }, [ref, options]);
-
-    return isIntersecting;
-  }
 
   const menuItems = [
     {
@@ -134,7 +111,7 @@ const Home: NextPage = () => {
         <section ref={sectionRefs.menu} className="snap-start min-h-screen w-full overflow-hidden py-12 sm:py-16 md:py-24" id="menu">
           <div className="container mx-auto px-4 lg:px-8">
             <h2 className="text-3xl sm:text-4xl font-bold text-center mb-8 sm:mb-12 md:mb-16 tracking-tight">
-              Today's top picks
+              Today&apos;s top picks
             </h2>
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-8 md:gap-10">
               {menuItems.map((item, index) => (
@@ -156,7 +133,7 @@ const Home: NextPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
               {/* Company Information */}
               <div className="space-y-4">
-                <img
+                <Image
                   src="/tweeps-logo.svg"
                   alt="Tweeps Logo"
                   className="h-44 w-auto"

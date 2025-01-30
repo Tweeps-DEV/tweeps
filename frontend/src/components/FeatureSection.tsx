@@ -1,14 +1,14 @@
 import React from 'react';
 import { Truck, CreditCard, Map, Utensils } from 'lucide-react';
 
-const FeatureCard = ({ icon: Icon, title, description, delay }) => (
-  <div className="group relative bg-white rounded-2xl p-4 sm:p-6 md:p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 mb-4 sm:mb-0">
-    <div className="flex flex-col items-center text-center space-y-3 sm:space-y-4 md:space-y-6">
-      <div className="p-2 sm:p-3 md:p-4 bg-gradient-to-br from-[#895B1E]/20 to-[#895B1E]/10 rounded-full ring-2 ring-[#f2ae2a] group-hover:ring-4 transition-all duration-300">
-        <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-[#f2ae2a] group-hover:scale-110 transition-transform duration-300" />
+const FeatureCard = ({ icon: Icon, title, description }) => (
+  <div className="group relative bg-white rounded-2xl p-5 sm:p-9 md:p-13 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 mb-4 sm:mb-0">
+    <div className="flex flex-col items-center text-center space-y-2 sm:space-y-4 md:space-y-6">
+      <div className="p-4 sm:p-5 md:p-6 rounded-full ring-2 ring-[#f2ae2a] group-hover:ring-4 transition-all duration-300">
+        <Icon className="w-6 h-6 sm:w-7 sm:h-7 md:w-9 md:h-9 text-[#f2ae2a] group-hover:scale-110 transition-transform duration-300" />
       </div>
-      <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">{title}</h3>
-      <p className="text-sm sm:text-base md:text-base text-gray-600 leading-relaxed">{description}</p>
+      <h3 className="text-2xl sm:text-3xl md:text-3xl font-bold text-gray-800">{title}</h3>
+      <p className="text-lg sm:text-xl md:text-xl text-gray-600 leading-relaxed">{description}</p>
     </div>
     <div className="absolute inset-0 bg-gradient-to-r from-[#f2ae2a]/5 to-transparent opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity duration-300" />
   </div>
@@ -19,12 +19,12 @@ const FeaturesSection = () => {
     {
       icon: Truck,
       title: "Fast Delivery",
-      description: "Swift and reliable delivery right to your doorstep, because great food shouldn't keep you waiting."
+      description: "Swift and reliable delivery right to your doorstep."
     },
     {
       icon: CreditCard,
       title: "Easy Checkout",
-      description: "Seamless payments through M-Pesa or cash on delivery - whatever works best for you!"
+      description: "Seamless payments through M-Pesa or cash on delivery."
     },
     {
       icon: Map,
@@ -34,7 +34,7 @@ const FeaturesSection = () => {
     {
       icon: Utensils,
       title: "Top-tier Food",
-      description: "Experience culinary excellence with our carefully crafted dishes made from premium ingredients."
+      description: "Experience culinary excellence with our carefully crafted dishes."
     }
   ];
 
@@ -46,12 +46,12 @@ const FeaturesSection = () => {
             <h2 className="text-3xl sm:text-4xl md:text-4xl lg:text-5xl font-bold mb-8 sm:mb-12 md:mb-16 text-gray-900">
               Why Choose <span className="text-[#f2ae2a]">Tweeps™</span>?
             </h2>
-            <p className="font-semibold text-base sm:text-2xl md:text-2xl lg:text-2xl text-gray-800 max-w-5xl mx-auto px-4">
+            <p className="text-xl sm:text-2xl md:text-2xl lg:text-3xl text-gray-800 max-w-3xl mx-auto px-3">
               Experience the perfect blend of convenience, quality, and reliability with every order.
             </p>
           </div>
           
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 md:gap-10">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-8 md:gap-12">
             {features.map((feature, index) => (
               <FeatureCard
                 key={feature.title}

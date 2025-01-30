@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/Authbutton';
 import { login } from '@/lib/auth';
+import Image from 'next/image';
 
 interface FormData {
   email: string;
@@ -29,23 +30,23 @@ const LoginPage: NextPage = () => {
   const [error, setError] = useState<string>('');
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [rememberMe, setRememberMe] = useState<boolean>(false);
-  const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
 
   useEffect(() => {
+    const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
     const errorMessage = searchParams.get('error');
     if (errorMessage) {
       setError(decodeURIComponent(errorMessage));
 
       const newUrl = new URL(window.location.href);
       newUrl.searchParams.delete('error');
-      router.replace(newUrl.pathname + newUrl.search, undefined, { shallow: true });
+      router.replace(newUrl.pathname + newUrl.search, undefined);
     }
     const savedEmail = localStorage.getItem('rememberedEmail');
     if (savedEmail) {
       setFormData(prev => ({ ...prev, email: savedEmail }));
       setRememberMe(true);
     }
-  }, []);
+  }, [router]);
 
   const validateForm = useCallback((): boolean => {
     const errors: ValidationErrors = {};
@@ -151,7 +152,7 @@ const LoginPage: NextPage = () => {
         className="w-full px-4 py-8 sm:px-6 lg:px-8"
       >
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <img 
+          <Image 
             src="/tweeps-logo.svg" 
             alt="Tweeps Logo" 
             className="mx-auto h-20 w-auto sm:h-20" 

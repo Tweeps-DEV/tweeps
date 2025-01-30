@@ -3,9 +3,18 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, Trash2, Plus, Minus } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
+
+interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  image_url?: string;
+}
 
 const CartPage = () => {
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -25,7 +34,7 @@ const CartPage = () => {
     fetchCart();
   }, []);
 
-  const updateQuantity = async (itemId, newQuantity) => {
+  const updateQuantity = async (itemId: string, newQuantity: number) => {
     if (newQuantity < 1 || newQuantity > 99) return;
 
     try {
@@ -45,7 +54,7 @@ const CartPage = () => {
     }
   };
 
-  const removeItem = async (itemId) => {
+  const removeItem = async (itemId: string) => {
     try {
       const response = await fetch(`/api/cart/items/${itemId}`, {
         method: 'DELETE'
@@ -65,7 +74,7 @@ const CartPage = () => {
     return {
       subtotal,
       deliveryFee,
-      total: subtotal + tax + deliveryFee
+      total: subtotal + deliveryFee
     };
   };
 
@@ -107,7 +116,7 @@ const CartPage = () => {
             <div className="space-y-4 mb-8">
               {cartItems.map((item) => (
                 <div key={item.id} className="bg-white p-4 rounded-lg shadow-sm flex items-center">
-                  <img
+                  <Image
                     src={item.image_url || '/api/placeholder/80/80'}
                     alt={item.name}
                     className="w-20 h-20 object-cover rounded-lg"

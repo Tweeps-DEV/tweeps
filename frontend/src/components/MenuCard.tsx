@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 interface MenuItemProps {
   title: string;
@@ -13,7 +14,7 @@ export const MenuCard = ({ title, description, price, image }: MenuItemProps) =>
     className="bg-white rounded-lg overflow-hidden shadow-lg w-full"
   >
     <div className="relative h-40 sm:h-48 overflow-hidden">
-      <img
+      <Image
         src={image}
         alt={title}
         className="w-full h-full object-cover"
@@ -24,7 +25,7 @@ export const MenuCard = ({ title, description, price, image }: MenuItemProps) =>
         <h3 className="text-2xl font-semibold">{title}</h3>
         <span className="text-[#f2ae2a] font-bold">{price}</span>
       </div>
-      <p className="text-sm sm:text-base text-gray-600">{description}</p>
+      <p className="text-md sm:text-base text-gray-600">{description}</p>
     </div>
   </motion.div>
 );
