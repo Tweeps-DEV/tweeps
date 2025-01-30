@@ -19,7 +19,6 @@ import Link from 'next/link';
 
 const Home: NextPage = () => {
   const {  session, status } = useSession();
-  const isAuthenticated = status === "authenticated";
   const user = session?.user;
   const [showContent, setShowContent] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -112,7 +111,6 @@ const Home: NextPage = () => {
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       <Navigation
-        isAuthenticated={isAuthenticated}
         user={user}
         isMenuOpen={isMenuOpen}
         setIsMenuOpen={setIsMenuOpen}
@@ -120,17 +118,17 @@ const Home: NextPage = () => {
       />
 
       <main className="flex-1 overflow-y-auto snap-y snap-proximity scroll-smooth no-scrollbar">
-        <div ref={sectionRefs.hero} className="snap-start h-screen w-full">
+        <section ref={sectionRefs.hero} className="snap-start h-screen w-full">
           <HeroSection />
-        </div>
+        </section>
 
         <section ref={sectionRefs.testimonials} className="snap-start h-screen overflow-hidden w-full py-24">
           <TestimonialCarousel />
         </section>
 
-        <div ref={sectionRefs.features} className="snap-start overflow-hidden h-screen w-full">
+        <section ref={sectionRefs.features} className="snap-start h-screen w-full">
           <FeatureSection />
-        </div>
+        </section>
 
         {/* Menu Section */}
         <section ref={sectionRefs.menu} className="snap-start min-h-screen w-full overflow-hidden py-12 sm:py-16 md:py-24" id="menu">
@@ -138,7 +136,7 @@ const Home: NextPage = () => {
             <h2 className="text-3xl sm:text-4xl font-bold text-center mb-8 sm:mb-12 md:mb-16 tracking-tight">
               Today's top picks
             </h2>
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 md:gap-10">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-8 md:gap-10">
               {menuItems.map((item, index) => (
                 <AnimatedSection key={item.title} delay={index * 0.2}>
                   <MenuCard {...item} />
