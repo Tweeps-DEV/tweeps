@@ -154,7 +154,9 @@ const LoginPage: NextPage = () => {
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <Image 
             src="/tweeps-logo.svg" 
-            alt="Tweeps Logo" 
+            alt="Tweeps Logo"
+            width={40}
+            height={40}
             className="mx-auto h-20 w-auto sm:h-20" 
           />
           <h1 className="mt-6 text-center text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">

@@ -22,6 +22,7 @@ interface UserData {
   id: string;
   name: string;
   email: string;
+  phone_contact?: string;
 }
 
 // Helper to handle user data
@@ -56,16 +57,16 @@ export const apiClient = async (endpoint: string, options: RequestInit = {}) => 
     const response = await fetch(`${baseUrl}${endpoint}`, {
       ...options,
       headers,
-      credentials: 'include', // This ensures cookies are sent with requests
+      credentials: 'include',
     });
+
+    const data = await response.json();
 
     if (response.status === 401) {
       clearUserData();
       window.location.href = '/login';
-      throw new Error('Session expired. Please login again.');
+      throw new Error(data.message);
     }
-
-    const data = await response.json();
     
     if (!response.ok) {
       if (response.status === 400 && data.errors) {
@@ -97,7 +98,7 @@ export const login = async (credentials: LoginCredentials): Promise<AuthResponse
 export const signup = async (userData: {
   username: string;
   email: string;
-  phone: string;
+  phone_contact: string;
   password: string;
 }): Promise<AuthResponse> => {
   const data = await apiClient('/api/auth/signup', {

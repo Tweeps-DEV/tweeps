@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
-"""Defines auth routes"""
 import jwt
 import logging
 import os
-from app import db, cache
-from datetime import datetime, timedelta, timezone
-from dotenv import load_dotenv
-from extensions import limiter
 from flask import Blueprint, request, jsonify, current_app
 from flask_cors import CORS
 from functools import wraps
 from logging.handlers import RotatingFileHandler
 from marshmallow import Schema, fields, validate, ValidationError
 from models.user import User
+from app import db, cache
+from datetime import datetime, timedelta, timezone
+from dotenv import load_dotenv
 from typing import Tuple, Dict, Any
 import re
 
@@ -34,7 +32,6 @@ logger.addHandler(handler)
 
 bp = Blueprint('auth', __name__)
 
-# Configure CORS with more specific settings
 CORS(bp, resources={
     r"/api/auth/*": {
         "origins": os.getenv("ALLOWED_ORIGINS", "").split(","),
@@ -50,79 +47,43 @@ CORS(bp, resources={
 TOKEN_EXPIRY = int(os.getenv('TOKEN_EXPIRY_HOURS', 24))
 REFRESH_TOKEN_EXPIRY = int(os.getenv('REFRESH_TOKEN_EXPIRY_DAYS', 30))
 MAX_LOGIN_ATTEMPTS = int(os.getenv('MAX_LOGIN_ATTEMPTS', 5))
-LOGIN_ATTEMPT_TIMEOUT = int(os.getenv('LOGIN_ATTEMPT_TIMEOUT', 15))  # minutes
+LOGIN_ATTEMPT_TIMEOUT = int(os.getenv('LOGIN_ATTEMPT_TIMEOUT', 15)) # minutes
 PASSWORD_MIN_LENGTH = int(os.getenv('PASSWORD_MIN_LENGTH', 8))
 
 class UserSchema(Schema):
-    """Schema for user registration validation with enhanced security rules"""
-    username = fields.Str(
-        required=True,
-        validate=[
-            validate.Length(min=3, max=30),
-            validate.Regexp(
-                r'^[\w\-]+$',
-                error='Username can only contain letters, numbers, underscores, and hyphens'
-            )
-        ]
-    )
+    username = fields.Str(required=True, validate=[validate.Length(min=3, max=30), validate.Regexp(r'^[\w\-]+$')])
     email = fields.Email(required=True)
-    password = fields.Str(
-        required=True,
-        validate=[
-            validate.Length(min=PASSWORD_MIN_LENGTH),
-            validate.Regexp(
-                r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$',
-                error='Password must contain at least one letter, one number, and one special character'
-            )
-        ]
-    )
-    phone_contact = fields.Str(
-        required=False,
-        validate=validate.Regexp(
-            r'^\+?1?\d{9,15}$',
-            error='Invalid phone number format'
-        )
-    )
+    password = fields.Str(required=True, validate=[
+        validate.Length(min=PASSWORD_MIN_LENGTH),
+        validate.Regexp(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$')
+    ])
+    phone_contact = fields.Str(required=False, validate=validate.Regexp(r'^\+?1?\d{9,15}$'))
 
 class LoginSchema(Schema):
-    """Schema for login validation"""
     email = fields.Email(required=True)
     password = fields.Str(required=True)
 
 def generate_tokens(user_id: int) -> Dict[str, str]:
-    """Generate secure access and refresh tokens with rate limiting"""
+    """Generate access and refresh tokens and store session in cache."""
     try:
-        active_tokens = cache.get(f'user_tokens_{user_id}') or 0
-        if active_tokens > 5:  # Limit concurrent sessions
-            raise ValueError('Too many active sessions')
-
         now = datetime.now(timezone.utc)
         access_expiration = now + timedelta(hours=TOKEN_EXPIRY)
         refresh_expiration = now + timedelta(days=REFRESH_TOKEN_EXPIRY)
 
         access_token = jwt.encode(
-            {
-                'id': user_id,
-                'exp': access_expiration,
-                'iat': now,
-                'type': 'access'
-            },
+            {'id': user_id, 'exp': access_expiration, 'iat': now, 'type': 'access'},
             current_app.config['SECRET_KEY'],
             algorithm="HS256"
         )
 
         refresh_token = jwt.encode(
-            {
-                'id': user_id,
-                'exp': refresh_expiration,
-                'iat': now,
-                'type': 'refresh'
-            },
+            {'id': user_id, 'exp': refresh_expiration, 'iat': now, 'type': 'refresh'},
             current_app.config['SECRET_KEY'],
             algorithm="HS256"
         )
 
-        cache.incr(f'user_tokens_{user_id}')
+        # Store session in cache with expiration matching the access token
+        cache.set(f'session_{user_id}', {'access': access_token, 'refresh': refresh_token}, timeout=TOKEN_EXPIRY * 3600)
 
         return {
             'access_token': access_token,
@@ -132,77 +93,44 @@ def generate_tokens(user_id: int) -> Dict[str, str]:
         logger.error(f"Token generation error for user {user_id}: {str(e)}")
         raise
 
-def token_required(f):
-    """Enhanced token verification decorator with additional security checks"""
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = request.headers.get('Authorization', '').split(" ")[-1]
-        if not token:
-            return jsonify({'message': 'Token is missing!'}), 401
+def verify_session(session_token: str) -> Tuple[bool, str]:
+    """Verify if the session token is valid."""
+    try:
+        decoded = jwt.decode(
+            session_token,
+            current_app.config['SECRET_KEY'],
+            algorithms=["HS256"]
+        )
+        user_id = decoded['id']
 
-        try:
-            if cache.get(f'blacklisted_token_{token}'):
-                raise jwt.InvalidTokenError('Token has been revoked')
+        cached_session = cache.get(f'session_{user_id}')
+        if cached_session and cached_session.get('access') == session_token:
+            return True, "Session is valid"
+        return False, "Invalid session"
+    except jwt.ExpiredSignatureError:
+        return False, "Expired session"
+    except jwt.InvalidTokenError:
+        return False, "Invalid token"
 
-            data = jwt.decode(
-                token,
-                current_app.config['SECRET_KEY'],
-                algorithms=["HS256"]
-            )
+@bp.route('/api/auth/verify', methods=['GET'])
+def verify() -> Tuple[Dict[str, Any], int]:
+    """Endpoint to verify session validity."""
+    token = request.headers.get('Authorization', '').split(" ")[-1]
+    if not token:
+        token = request.cookies.get('session')
 
-            if data.get('type') != 'access':
-                raise jwt.InvalidTokenError('Invalid token type')
+    if not token:
+        return jsonify({'message': 'Token is missing!'}), 401
 
-            current_user = User.query.filter_by(id=data['id']).first()
-            if not current_user:
-                raise jwt.InvalidTokenError('User not found')
-
-            if not current_user.is_active:
-                raise jwt.InvalidTokenError('User account is disabled')
-
-            rate_limit_key = f'rate_limit_{current_user.id}'
-            if cache.get(rate_limit_key):
-                raise jwt.InvalidTokenError('Too many requests')
-            cache.set(rate_limit_key, 1, timeout=1)  # 1 request per second per user
-
-            return f(current_user, *args, **kwargs)
-
-        except jwt.ExpiredSignatureError:
-            return jsonify({'message': 'Token has expired!'}), 401
-        except jwt.InvalidTokenError as e:
-            return jsonify({'message': str(e)}), 401
-        except Exception as e:
-            logger.error(f"Authentication error: {str(e)}")
-            return jsonify({'message': 'Authentication failed'}), 500
-
-    return decorated
-
-def check_login_attempts(email: str) -> bool:
-    """Check if user has exceeded maximum login attempts"""
-    key = f'login_attempts_{email}'
-    attempts = cache.get(key) or 0
-    return attempts >= MAX_LOGIN_ATTEMPTS
-
-def record_login_attempt(email: str, success: bool) -> None:
-    """Record login attempt and handle rate limiting"""
-    key = f'login_attempts_{email}'
-    if success:
-        cache.delete(key)
-    else:
-        attempts = cache.get(key) or 0
-        cache.set(key, attempts + 1, timeout=LOGIN_ATTEMPT_TIMEOUT * 60)
+    valid, message = verify_session(token)
+    if valid:
+        return jsonify({'valid': True}), 200
+    return jsonify({'valid': False, 'message': message}), 401
 
 @bp.route('/api/auth/signup', methods=['POST'])
-@limiter.limit("5 per minute")
 def signup() -> Tuple[Dict[str, Any], int]:
-    """Production-grade signup endpoint with enhanced security"""
     try:
-        data = request.get_json()
-        if not data:
-            return jsonify({'message': 'No data provided'}), 400
-
-        if 'phone' in data:
-            data['phone_contact'] = data.pop('phone')
+        data = request.get_json() or {}
 
         errors = UserSchema().validate(data)
         if errors:
@@ -215,22 +143,15 @@ def signup() -> Tuple[Dict[str, Any], int]:
             return jsonify({'message': 'Username already exists'}), 400
 
         new_user = User(
-            username=data['username'].strip(),
-            email=data['email'].lower().strip(),
-            phone_contact=data.get('phone_contact', '').strip()
+            username=data['username'],
+            email=data['email'],
+            phone_contact=data.get('phone_contact')
         )
         new_user.set_password(data['password'])
-        new_user.validate()
-
         db.session.add(new_user)
         db.session.commit()
 
-        tokens = generate_tokens(new_user.id)
-
-        logger.info(f"New user registered: {new_user.email}")
-
         return jsonify({
-            'tokens': tokens,
             'user': {
                 'id': str(new_user.id),
                 'name': new_user.username,
@@ -238,7 +159,6 @@ def signup() -> Tuple[Dict[str, Any], int]:
                 'phone_contact': new_user.phone_contact
             }
         }), 201
-
     except ValidationError as err:
         return jsonify({'errors': err.messages}), 400
     except Exception as e:
@@ -247,9 +167,7 @@ def signup() -> Tuple[Dict[str, Any], int]:
         return jsonify({'message': 'Registration failed'}), 500
 
 @bp.route('/api/auth/login', methods=['POST'])
-@limiter.limit("10 per minute")
 def login() -> Tuple[Dict[str, Any], int]:
-    """Production-grade login endpoint with security features"""
     try:
         data = request.get_json()
         if not data:
@@ -259,24 +177,16 @@ def login() -> Tuple[Dict[str, Any], int]:
         if errors:
             return jsonify({'errors': errors}), 400
 
-        email = data['email'].lower().strip()
-
-        if check_login_attempts(email):
-            return jsonify({
-                'message': f'Too many login attempts. Please try again in {LOGIN_ATTEMPT_TIMEOUT} minutes'
-            }), 429
+        email = data['email'].lower()
 
         user = User.query.filter(User.email.ilike(email)).first()
         if not user or not user.check_password(data['password']):
-            record_login_attempt(email, False)
             return jsonify({'message': 'Invalid credentials'}), 401
 
         if not user.is_active:
             return jsonify({'message': 'Account is disabled'}), 403
 
         tokens = generate_tokens(user.id)
-
-        record_login_attempt(email, True)
         logger.info(f"Successful login: {email}")
 
         response = jsonify({
@@ -288,9 +198,15 @@ def login() -> Tuple[Dict[str, Any], int]:
                 'phone_contact': user.phone_contact
             }
         })
-        response.set_cookie('session', tokens['access_token'], httponly=True, secure=True, samesite='Strict')
+        response.set_cookie(
+            'session',
+            tokens['access_token'],
+            httponly=True,
+            secure=True,
+            samesite='Strict',
+            max_age=TOKEN_EXPIRY * 3600
+        )
         return response, 200
-
     except ValidationError as err:
         return jsonify({'errors': err.messages}), 400
     except Exception as e:
@@ -298,70 +214,80 @@ def login() -> Tuple[Dict[str, Any], int]:
         return jsonify({'message': 'Login failed'}), 500
 
 @bp.route('/api/auth/logout', methods=['POST'])
-@token_required
-def logout(current_user) -> Tuple[Dict[str, str], int]:
-    """Production-grade logout endpoint with token invalidation"""
+def logout() -> Tuple[Dict[str, str], int]:
     try:
         token = request.headers.get('Authorization', '').split(" ")[-1]
+        if not token:
+            token = request.cookies.get('session')
 
-        cache.set(
-            f'blacklisted_token_{token}',
-            1,
-            timeout=TOKEN_EXPIRY * 3600
+        if not token:
+            return jsonify({'message': 'Token is missing!'}), 401
+
+        decoded = jwt.decode(
+            token,
+            current_app.config['SECRET_KEY'],
+            algorithms=["HS256"]
         )
+        user_id = decoded['id']
 
-        cache.decr(f'user_tokens_{current_user.id}')
-
-        logger.info(f"User logged out: {current_user.email}")
+        # Clear session from Redis
+        cache.delete(f'session_{user_id}')
         return jsonify({'message': 'Successfully logged out'}), 200
-
+    except jwt.InvalidTokenError:
+        return jsonify({'message': 'Invalid token'}), 401
     except Exception as e:
         logger.error(f"Logout error: {str(e)}")
         return jsonify({'message': 'Logout failed'}), 500
 
-@bp.route('/api/auth/refresh', methods=['POST'])
-def refresh_token() -> Tuple[Dict[str, Any], int]:
-    """Endpoint to refresh access token using refresh token"""
+@bp.route('/api/auth/session', methods=['GET'])
+def session() -> Tuple[Dict[str, Any], int]:
+    """Handle Next.js session requests with compatibility layer"""
+    token = request.headers.get('Authorization', '').split(" ")[-1]
+
+    if not token:
+        token = request.cookies.get('session')
+
+    if not token:
+        return jsonify({'user': None}), 200
+
     try:
-        refresh_token = request.headers.get('Authorization', '').split(" ")[-1]
-        if not refresh_token:
-            return jsonify({'message': 'Refresh token is missing'}), 401
-
-        if cache.get(f'blacklisted_token_{refresh_token}'):
-            return jsonify({'message': 'Refresh token has been revoked'}), 401
-
         data = jwt.decode(
-            refresh_token,
+            token,
             current_app.config['SECRET_KEY'],
             algorithms=["HS256"]
         )
 
-        if data.get('type') != 'refresh':
-            return jsonify({'message': 'Invalid token type'}), 401
+        if data.get('type') != 'access':
+            return jsonify({'user': None}), 200
 
         user_id = data['id']
-        new_tokens = generate_tokens(user_id)
+        user = User.query.get(user_id)
 
-        cache.set(
-            f'blacklisted_token_{refresh_token}',
-            1,
-            timeout=REFRESH_TOKEN_EXPIRY * 86400
-        )
+        if not user or not user.is_active:
+            return jsonify({'user': None}), 200
 
-        response = jsonify({'tokens': new_tokens})
-        response.set_cookie('session', new_tokens['access_token'], httponly=True, secure=True, samesite='Strict')
-        return response, 200
+        return jsonify({
+            'user': {
+                'id': str(user.id),
+                'name': user.username,
+                'email': user.email
+            }
+        }), 200
 
-    except jwt.ExpiredSignatureError:
-        return jsonify({'message': 'Refresh token has expired'}), 401
-    except jwt.InvalidTokenError as e:
-        return jsonify({'message': str(e)}), 401
+    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+        return jsonify({'user': None}), 200
     except Exception as e:
-        logger.error(f"Token refresh error: {str(e)}")
-        return jsonify({'message': 'Token refresh failed'}), 500
+        logger.error(f"Session error: {str(e)}")
+        return jsonify({'user': None}), 200
 
-@bp.route('/api/auth/verify', methods=['GET'])
-@token_required
-def verify_token(current_user):
-    """Endpoint to verify if a token is valid"""
-    return jsonify({'valid': True}), 200
+@bp.route('/api/auth/_log', methods=['POST'])
+def auth_log() -> Tuple[Dict[str, bool], int]:
+    """Handle Next.js auth logging requests with compatibility layer"""
+    try:
+        data = request.get_json()
+        if data and 'type' in data:
+            logger.info(f"Auth event: {data['type']}")
+        return jsonify({'success': True}), 200
+    except Exception as e:
+        logger.error(f"Auth log error: {str(e)}")
+        return jsonify({'success': False}), 200

@@ -47,45 +47,49 @@ const SignupPage: NextPage = () => {
   const [error, setError] = useState<string>('');
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
 
+  const VALIDATION_PATTERNS = {
+    username: /^[\w\-]+$/,
+    password: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
+    phone_contact: /^\+?1?\d{9,15}$/,
+    email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  };
+
   const validateForm = useCallback((): boolean => {
     const errors: ValidationErrors = {};
     let isValid = true;
 
-    // Validation
     if (!formData.username.trim()) {
       errors.username = 'Username is required';
       isValid = false;
-    } else if (formData.username.trim().length < 3) {
-      errors.username = 'Username must be at least 3 characters';
+    } else if (!VALIDATION_PATTERNS.username.test(formData.username)) {
+      errors.username = 'Username can only contain letters, numbers, and hyphens';
+      isValid = false;
+    } else if (formData.username.length < 3 || formData.username.length > 30) {
+      errors.username = 'Username must be between 3 and 30 characters';
       isValid = false;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email) {
       errors.email = 'Email is required';
       isValid = false;
-    } else if (!emailRegex.test(formData.email)) {
+    } else if (!VALIDATION_PATTERNS.email.test(formData.email)) {
       errors.email = 'Please enter a valid email address';
       isValid = false;
     }
 
-    const phoneRegex = /^\+?1?\d{9,15}$/;
     if (!formData.phone_contact) {
       errors.phone_contact = 'Phone number is required';
       isValid = false;
-    } else if (!phoneRegex.test(formData.phone_contact)) {
-      errors.phone_contact = 'Please enter a valid phone number';
+    } else if (!VALIDATION_PATTERNS.phone_contact.test(formData.phone_contact)) {
+      errors.phone_contact = 'Please enter a valid phone number (e.g., +254712345678)';
       isValid = false;
     }
 
     if (!formData.password) {
       errors.password = 'Password is required';
       isValid = false;
-    } else if (formData.password.length < 8) {
-      errors.password = 'Password must be at least 8 characters';
-      isValid = false;
-    } else if (!/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/.test(formData.password)) {
-      errors.password = 'Password must contain at least one letter, one number, and one special character (@$!%*#?&)';
+    } else if (!VALIDATION_PATTERNS.password.test(formData.password)) {
+      errors.password = 'Password must be at least 8 characters and contain at least one letter, one number, and one special character (@$!%*#?&)';
       isValid = false;
     }
 
@@ -99,8 +103,7 @@ const SignupPage: NextPage = () => {
 
     setValidationErrors(errors);
     return isValid;
-  }, [formData]);
-
+    }, [formData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -171,7 +174,9 @@ const SignupPage: NextPage = () => {
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <Image 
             src="/tweeps-logo.svg" 
-            alt="Tweeps Logo" 
+            alt="Tweeps Logo"
+            width={40}
+            height={40}
             className="mx-auto h-20 w-auto sm:h-20" 
           />
           <h1 className="mt-6 text-center text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
@@ -288,18 +293,18 @@ const SignupPage: NextPage = () => {
                     type="tel"
                     autoComplete="tel"
                     required
-                    value={formData.phone}
+                    value={formData.phone_contact}
                     onChange={handleChange}
                     className={`appearance-none block w-full px-3 py-2 border ${
-                      validationErrors.phone ? 'border-red-300' : 'border-gray-300'
+                      validationErrors.phone_contact ? 'border-red-300' : 'border-gray-300'
                     } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#f2ae2a] focus:border-[#f2ae2a] sm:text-sm transition-colors hover:border-gray-400`}
                     placeholder="+254 712345678"
-                    aria-invalid={!!validationErrors.phone}
-                    aria-describedby={validationErrors.phone ? "phone-error" : undefined}
+                    aria-invalid={!!validationErrors.phone_contact}
+                    aria-describedby={validationErrors.phone_contact ? "phone-error" : undefined}
                   />
-                  {validationErrors.phone && (
+                  {validationErrors.phone_contact && (
                     <p className="mt-1 text-sm text-red-600" id="phone-error">
-                      {validationErrors.phone}
+                      {validationErrors.phone_contact}
                     </p>
                   )}
                 </div>
