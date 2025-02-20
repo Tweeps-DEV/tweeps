@@ -1,21 +1,35 @@
+import { useState, useEffect } from 'react';
 import { Menu, Info, X } from 'lucide-react';
-import { signOut, useSession } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './ui/Button';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Dispatch, SetStateAction } from 'react';
+import { logout, getUserData } from '@/lib/auth';
 
 interface NavigationProps {
-  isAuthenticated: boolean;
   isMenuOpen: boolean;
-  setIsMenuOpen: (isOpen: boolean) => void;
+  setIsMenuOpen: Dispatch<SetStateAction<boolean>>;
+  onNavigate?: (sectionId: "menu" | "features" | "hero" | "testimonials" | "about") => void;
 }
 
 export const Navigation: React.FC<NavigationProps> = ({
   isMenuOpen,
   setIsMenuOpen,
 }) => {
-  const { status } = useSession();
+  // Replace useSession with a custom authentication state
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  
+  // Check authentication status on component mount and after changes
+  useEffect(() => {
+    const userData = getUserData();
+    setIsAuthenticated(!!userData);
+  }, []);
+  
+  const handleLogout = async () => {
+    await logout();
+    setIsAuthenticated(false);
+  };
 
   return (
     <>
@@ -24,7 +38,12 @@ export const Navigation: React.FC<NavigationProps> = ({
           <div className="container mx-auto flex justify-between items-center">
             <div className="flex-shrink-0">
               <Link href="/" legacyBehavior>
-                <Image src="/tweeps-logo.svg" alt="Tweeps Logo" className="h-16 w-auto cursor-pointer" />
+                <Image src="/tweeps-logo.svg"
+                  alt="Tweeps Logo"
+                  width={40}
+                  height={40}
+                  className="cursor-pointer"
+                />
               </Link>
             </div>
 
@@ -35,8 +54,8 @@ export const Navigation: React.FC<NavigationProps> = ({
               <a href="#about" className="text-gray-600 hover:text-[#f2ae2a] transition-colors">
                 About
               </a>
-              {status === "authenticated" ? (
-                <Button variant="secondary" size="sm" onClick={() => signOut({ callbackUrl: '/login' })}>
+              {isAuthenticated ? (
+                <Button variant="secondary" size="sm" onClick={handleLogout}>
                   Logout
                 </Button>
               ) : (
@@ -48,6 +67,7 @@ export const Navigation: React.FC<NavigationProps> = ({
               )}
             </div>
 
+            {/* Mobile menu toggle button */}
             <motion.button
               className="lg:hidden text-gray-600 hover:text-[#f2ae2a] z-50"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -125,8 +145,8 @@ export const Navigation: React.FC<NavigationProps> = ({
                     visible: { opacity: 1, x: 0 }
                   }}
                 >
-                  {status === "authenticated" ? (
-                    <Button variant="secondary" size="lg" className="w-full tracking-tight" onClick={() => signOut({ callbackUrl: '/login' })}>
+                  {isAuthenticated ? (
+                    <Button variant="secondary" size="lg" className="w-full tracking-tight" onClick={handleLogout}>
                       Logout
                     </Button>
                   ) : (

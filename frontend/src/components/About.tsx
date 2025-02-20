@@ -18,12 +18,16 @@ const AboutSection = () => {
                 <div className="space-y-6 sm:space-y-6">
                   <Image 
                     src="/api/placeholder/400/500" 
-                    alt="Restaurant atmosphere" 
+                    alt="Restaurant atmosphere"
+                    width={40}
+                    height={40}
                     className="w-full h-32 sm:h-48 md:h-64 object-cover rounded-lg shadow-md transition-transform hover:scale-105 bg-white"
                   />
                   <Image
                     src="/api/placeholder/400/300" 
                     alt="African cuisine" 
+                    width={40}
+                    height={40}
                     className="w-full h-24 sm:h-32 md:h-48 object-cover rounded-lg shadow-md transition-transform hover:scale-105 bg-white"
                   />
                 </div>
@@ -31,11 +35,15 @@ const AboutSection = () => {
                   <Image
                     src="/api/placeholder/400/300" 
                     alt="Customer experience" 
+                    width={40}
+                    height={40}
                     className="w-full h-24 sm:h-32 md:h-48 object-cover rounded-lg shadow-md transition-transform hover:scale-105 bg-white"
                   />
                   <Image
                     src="/api/placeholder/400/500" 
                     alt="Food preparation" 
+                    width={40}
+                    height={40}
                     className="w-full h-32 sm:h-48 md:h-64 object-cover rounded-lg shadow-md transition-transform hover:scale-105 bg-white"
                   />
                 </div>

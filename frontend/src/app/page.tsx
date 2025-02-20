@@ -15,7 +15,7 @@ import AboutSection from '../components/About';
 import Image from 'next/image';
 
 const Home: NextPage = () => {
-  const {  session } = useSession();
+  const { data: session } = useSession();
   const user = session?.user;
   const [showContent, setShowContent] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -34,7 +34,6 @@ const Home: NextPage = () => {
     sectionRefs[sectionId].current?.scrollIntoView({
       behavior: 'smooth',
       block: 'start',
-      duration: 1000
     });
   };
 
@@ -136,7 +135,8 @@ const Home: NextPage = () => {
                 <Image
                   src="/tweeps-logo.svg"
                   alt="Tweeps Logo"
-                  className="h-44 w-auto"
+                  width={50}
+                  height={44}
                 />
                 <p className="text-sm text-gray-800 max-w-xs">
                   Serving delicious, quality fast food since 2020. Your satisfaction is our priority.

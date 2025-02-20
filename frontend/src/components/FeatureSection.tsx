@@ -1,7 +1,13 @@
 import React from 'react';
-import { Truck, CreditCard, Map, Utensils } from 'lucide-react';
+import { Truck, CreditCard, Map, Utensils, LucideIcon } from 'lucide-react';
 
-const FeatureCard = ({ icon: Icon, title, description }) => (
+interface FeatureCardProps {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+}
+
+const FeatureCard = ({ icon: Icon, title, description }: FeatureCardProps) => (
   <div className="group relative bg-white rounded-2xl p-5 sm:p-9 md:p-13 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 mb-4 sm:mb-0">
     <div className="flex flex-col items-center text-center space-y-2 sm:space-y-4 md:space-y-6">
       <div className="p-4 sm:p-5 md:p-6 rounded-full ring-2 ring-[#f2ae2a] group-hover:ring-4 transition-all duration-300">

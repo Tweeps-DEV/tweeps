@@ -18,7 +18,13 @@ export default function LottiePlayer({ onLoadComplete }: { onLoadComplete: () =>
     <div className="relative w-full max-w-[800px] mx-auto">
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-          <Image src="/loader.gif" alt="Loading animation"/>
+          <Image src="/loader.gif"
+            alt="Loading animation"
+            width={400}
+            height={400}
+            unoptimized
+            priority
+          />
         </div>
       )}
     </div>
