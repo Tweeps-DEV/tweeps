@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import DashboardGreeting from '@/components/dashboard/DashboardGreeting';
-import { Search, Menu, ShoppingCart } from 'lucide-react';
+import DashboardHeader from '@/components/DashboardHeader'; // Import the new header
+import { Search } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { toast } from '@/components/ui/use-toast';
 
 interface MenuItem {
@@ -94,22 +94,8 @@ const DashboardContent = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <button className="p-2 rounded-lg hover:bg-gray-100">
-              <Menu className="h-6 w-6 text-gray-600" />
-            </button>
-            <Link href="/cart" className="p-2 rounded-lg hover:bg-gray-100 relative">
-              <ShoppingCart className="h-6 w-6 text-gray-600" />
-              <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                {0}
-              </span>
-            </Link>
-          </div>
-        </div>
-      </header>
+      {/* New Header Component */}
+      <DashboardHeader />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -122,7 +108,7 @@ const DashboardContent = () => {
         <div className="relative mb-6">
           <input
             type="text"
-            placeholder="Search menu items..."
+            placeholder="Tell me what you'd like to eat..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f2ae2a] focus:border-transparent"
@@ -194,12 +180,10 @@ const DashboardContent = () => {
   );
 };
 
-
 const DashboardPage = () => {
   return (
     <DashboardContent />
   );
 };
-
 
 export default DashboardPage;

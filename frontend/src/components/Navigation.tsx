@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Menu, Info, X } from 'lucide-react';
+import { Menu, Info, X, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './ui/Button';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Dispatch, SetStateAction } from 'react';
 import { logout, getUserData } from '@/lib/auth';
+import { usePathname } from 'next/navigation';
 
 interface NavigationProps {
   isMenuOpen: boolean;
@@ -17,10 +18,8 @@ export const Navigation: React.FC<NavigationProps> = ({
   isMenuOpen,
   setIsMenuOpen,
 }) => {
-  // Replace useSession with a custom authentication state
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   
-  // Check authentication status on component mount and after changes
   useEffect(() => {
     const userData = getUserData();
     setIsAuthenticated(!!userData);
